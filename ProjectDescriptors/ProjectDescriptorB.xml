@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<Project 
+	descriptorversion="1.2" 
+	id="DExp1"
+	descr="Design Experiment 1" 
+	longdescription="The interviews done for 'Design Experiment 1', London, Feb 2010"
+	gesturespeechpath="GestureSpeechTranscripts/">
+<!--- Version 1.2 new: paper format-->
+
+<!--RESORCE: Verbal Data / Corpus Block-->	
+
+<Resource id="DExp1A" descr="Transcript Block A" type="transcript-block" file="VerbalData/block1.xml" />
+
+<!--RESORCE: Spatial Media-->
+<Resource id="FrMi-case1-traj"	descr="Stroke trajectories, FrMi, case 1"	type="svg-trajectories" 
+	file="SpatialData/B-BenjFrankl/DesignExperiment1-FrMi-task1.svg"/>
+
+<Resource id="JoNo-case1-traj" 	descr="Stroke trajectories, JoNo, case 1"	type="svg-trajectories" 
+	file="SpatialData/B-BenjFrankl/DesignExperiment1-JoNo-task1.svg"/>
+
+<Resource id="De-case1-traj" 	descr="Stroke trajectories, De, case 1"		type="svg-trajectories" 
+	file="SpatialData/B-BenjFrankl/DesignExperiment1-De-task1.svg"/>
+
+<Resource id="PeFe-case1-traj" 	descr="Stroke trajectories, PeFe, case 1"		type="svg-trajectories" 
+	file="SpatialData/B-BenjFrankl/DesignExperiment1-PeFe-task1.svg"/>
+
+<Resource id="De-case2-traj" 	descr="Stroke trajectories, De, case 2"		type="svg-trajectories" 
+	file="SpatialData/B-Hbf-Case/DesignExperiment1-De-task2.svg"/>
+
+<Resource id="legendeAtraj" 	descr=""		type="svg-trajectories" 
+	file="SpatialData/legendeA.svg"/>
+
+	
+<!-- CANVAS -->
+<Canvas id="B-BFrankl-A4" descr="Case1, Berlin, Benj. Fr. Hospital, rough structure"
+	graphpagelen="230" textperline="230" textx="50" texty="100" textscale="0.8" paperFormat="A4">
+
+	<TrajectoryData resource="FrMi-case1-traj" 	includedimage="B-BenjFrankl-plan_FrMi.smaller.clip.jpg"	imagecoordinates="X-mirrorY"/>
+	<TrajectoryData resource="JoNo-case1-traj" 	includedimage="B-BenjFrankl-plan_JoNo.smaller.clip.jpg" imagecoordinates="X-mirrorY"/>
+	<TrajectoryData resource="De-case1-traj" 	includedimage="B-BenjFrankl-plan_De.smaller.clip.jpg" 	imagecoordinates="X-mirrorY"/>
+
+	<TrajectoryData resource="PeFe-case1-traj" 	includedimage="B-BenjFrankl-plan_PeFe.smaller.clip.jpg" 	imagecoordinates="X-mirrorY"/>
+</Canvas>
+	
+<Canvas id="B-Hbf" descr="Case2, Berlin, Main Station Outline"
+	graphpagelen="230" textperline="230" textx="200" texty="50" textscale="0.7">
+
+	<TrajectoryData resource="De-case2-traj" 	includedimage="B-Hbf-Case-plan_De.smaller.jpg" 	imagecoordinates="X-mirrorY"/>
+</Canvas>
+
+<Canvas id="legende" descr="Legende"
+	graphpagelen="50" textpagelen="210" textperline="50" textx="0" texty="-3000" textscale="0.9">
+
+	<TrajectoryData resource="legendeAtraj"  includedimage="fake.jpg" imagecoordinates="X-mirrorY"/>
+</Canvas>
+
+<Canvas id="B-BFrankl-A0" descr="Case1, Berlin, Benj. Fr. Hospital, rough structure"
+	graphpagelen="9000" textperline="115" textfromMarker="TEXT_MARKER" textscale="1.00" paperFormat="A0" portrait="1">
+
+	<TrajectoryData resource="FrMi-case1-traj" 	includedimage="B-BenjFrankl-plan_FrMi.smaller.clip.jpg"	imagecoordinates="X-mirrorY"/>
+</Canvas>
+
+	
+<!-- SESSION -->
+
+
+<Session id="legende" descr=". . .">
+	<Episode id="case1" descr=". . ." transcriptsequence="legendeA" transcriptblock="DExp1A" 
+		transcriptsection="case1" transcript_id_prefix="case1:" canvas="legende" />
+</Session>
+
+<Session id="FrMi" descr="FrMi, Spring 2010">
+	<Person id="R" pseudonym="Re" role="researcher"/>
+	<Person id="FrMi" pseudonym="FrMi" role="informer"/>
+	<Episode id="case1" descr="Hospital Case" transcriptsequence="FrMi-all" transcriptblock="DExp1A" transcriptsection="case1" transcript_id_prefix="case1:" canvas="B-BFrankl-A4" resourcesubset="FrMi-case1-traj"/>
+
+	<Episode id="case1-poster" descr="Hospital Case" transcriptsequence="FrMi-all" transcriptblock="DExp1A" transcriptsection="case1" transcript_id_prefix="case1:" canvas="B-BFrankl-A0" resourcesubset="FrMi-case1-traj"/>
+</Session>
+
+<Session id="JoNo" descr="JoNo, Spring 2010">
+	<Person id="R" pseudonym="R" role="researcher"/>
+	<Person id="JoNo" pseudonym="JoNo" role="informer"/>
+	<Episode id="case1" descr="Hospital Case" transcriptsequence="JoNo-all" transcriptblock="DExp1A" 
+		transcriptsection="case1" transcript_id_prefix="case1:" canvas="B-BFrankl-A4" resourcesubset="JoNo-case1-traj"/>
+</Session>
+
+<Session id="PeFe" descr="PeFe, Spring 2010">
+	<Person id="R" pseudonym="R" role="researcher"/>
+	<Person id="PeFe" pseudonym="PeFe" role="informer"/>
+	<Episode id="case1" descr="Hospital Case" transcriptsequence="PeFe-all" transcriptblock="DExp1A" 
+		transcriptsection="case1" transcript_id_prefix="case1:" canvas="B-BFrankl-A4" resourcesubset="PeFe-case1-traj"/>
+</Session>
+
+<Session id="De" descr="De, Spring 2010">
+	<Person id="R" pseudonym="R" role="researcher"/>
+	<Person id="De" pseudonym="De" role="informer"/>
+	<Episode id="case1" descr="Hospital Case" transcriptsequence="De-all" transcriptblock="DExp1A" 
+		transcriptsection="case1" transcript_id_prefix="case1:" canvas="B-BFrankl-A4"  resourcesubset="De-case1-traj"/>
+	<Episode id="case2" descr="Hospital Case" transcriptsequence="De-all" transcriptblock="DExp1A" 
+		transcriptsection="case2" transcript_id_prefix="case2:" canvas="B-Hbf"  resourcesubset="De-case2-traj"/>
+</Session>
+
+</Project>
