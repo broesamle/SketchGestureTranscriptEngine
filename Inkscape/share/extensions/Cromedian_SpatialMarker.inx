@@ -1,0 +1,21 @@
+<inkscape-extension>
+    <_name>mark spatial elements</_name>
+    <id>woz.cromedian.spatialmarker</id>
+	<dependency type="executable" location="extensions">Cromedian_SpatialMarker.py</dependency>
+	<dependency type="executable" location="extensions">inkex.py</dependency>
+
+	<param name="idsss" type="string" gui-text="IDs (VP03_23,...):"></param>
+	<param name="style" type="string" gui-text="Style (stroke-width,opacity,...):"></param>
+	<param name="value" type="string" gui-text="Value (5px,0.5,...):"></param>
+
+	
+    <effect>
+		<object-type>path</object-type>
+		<effects-menu>
+			<submenu _name="+ Cromedian" />
+		</effects-menu>
+    </effect>
+    <script>
+        <command reldir="extensions" interpreter="python">Cromedian_SpatialMarker.py</command>
+    </script>
+</inkscape-extension>

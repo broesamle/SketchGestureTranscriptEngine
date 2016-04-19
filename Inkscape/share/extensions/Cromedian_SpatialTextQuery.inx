@@ -1,0 +1,27 @@
+<inkscape-extension>
+    <_name>Text by Spatial Seed</_name>
+    <id>woz.cromedian.spatialtextquery</id>
+	<dependency type="executable" location="extensions">Cromedian_SpatialTextQuery.py</dependency>
+	<dependency type="executable" location="extensions">inkex.py</dependency>
+	<dependency type="executable" location="extensions">Woz_AnnotatedTranscriptXML.py</dependency>
+	<dependency type="executable" location="extensions">WDataHandlingA.py</dependency>
+	<param name="contextsizepre" type="string" gui-text="Prefix Size:"></param>
+	<param name="contextsizesucc" type="string" gui-text="Suffix Size:"></param>
+	<param name="boxwidth" type="string" gui-text="Box Width:"></param>
+	<param name="textsizefactor" type="string" gui-text="Text Size Factor:"></param>
+	<param name="increase_main" type="string" gui-text="Inc. Seed Stroke: "></param>
+	<param name="increase_sub1" type="string" gui-text="Inc. Co-occurring Stroke: "></param>
+	<param name="spacefactor" type="string" gui-text="Spacefactor: "></param>
+	<param name="context_elements" type="string" gui-text="Co-occurring (yes/no): "></param>
+	<param name="kill_duplicates" type="string" gui-text="Drop duplicates (yes/no): "></param>
+	<param name="layout" type="string" gui-text="Layout (offset/circle/coveredAreaX): "></param>
+    <effect>
+		<object-type>path</object-type>
+		<effects-menu>
+			<submenu _name="+ Cromedian"/>
+		</effects-menu>
+    </effect>
+    <script>
+        <command reldir="extensions" interpreter="python">Cromedian_SpatialTextQuery.py</command>
+    </script>
+</inkscape-extension>

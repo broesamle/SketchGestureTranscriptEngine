@@ -1,0 +1,18 @@
+<inkscape-extension>
+    <_name>write spatial element IDs</_name>
+    <id>woz.cromedian.spatialidwriter</id>
+	<dependency type="executable" location="extensions">Cromedian_SpatialIDWriter.py</dependency>
+	<dependency type="executable" location="extensions">inkex.py</dependency>
+	<param name="find" type="string" gui-text="find ..."></param>
+	<param name="replace" type="string" gui-text="... replace (before writing)"></param>
+
+    <effect>
+		<object-type>path</object-type>
+		<effects-menu>
+			<submenu _name="+ Cromedian" />
+		</effects-menu>
+    </effect>
+    <script>
+        <command reldir="extensions" interpreter="python">Cromedian_SpatialIDWriter.py</command>
+    </script>
+</inkscape-extension>

@@ -1,0 +1,108 @@
+
+legende:
+
+drawGestureActivity -s legende -yzadf _plain
+
+
+
+roh-praeparat in drei seiten unterteilt (4850..5700, 300 Zeichen/Seite, ueberlange textzeile 350 Zeichen); mit/ohne Header:
+ 
+drawGestureActivity -s JoNo -e case1 -B 4850 -E 5700 -G 300 -L 350 -kdarm
+drawGestureActivity -s JoNo -e case1 -B 4850 -E 5700 -G 300 -L 350 -kdarmz
+
+drawGestureActivity -s PeFe -e case1 -B 2290 -E 3680 -G 200 -L 250 -kdarmz
+
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s PeFe -e case1 -B 1000 -E 1200 -G 250 -L 250 -kdarmz
+
+JoNo C1 P10/11
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s JoNo -e case1 -B 2790 -E 11111 -G 200 -L 280 -p 1 -kdarmz
+
+JoNo C1 P2
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s JoNo -e case1 -B 810 -E 11111 -G 180 -L 280 -p 1 -kdarmz
+
+FrMi C1 P3:
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s FrMi -e case1 -B 920 -E 11111 -G 220 -L 230 -p 1 -kdarmz
+
+
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s FrMi -e case1 -B 4496 -E 11111 -G 180 -L 180 -p 1-2 -kdarmz 
+
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s FrMi -e case1 -B 7380 -E 11111 -G 240 -L 240 -p 1 -kdarmz 
+
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py -s FrMi -e case1 -B 6000 -E 11111 -G 200 -L 280 -p 1-3 -kdarmz 
+
+
+
+cd "\Users\Martin.Broesamle\Desktop\MultimodalCorpus\Methods+Sources\DesignExperiment1\CodingData\90_Reaktor"
+
+
+
+python c:\Python27\Lib\site-packages\SpaDoAK-G1\drawGestureActivity.py --help
+----------------- SpaDoAK-G1 (v01) -----------------
+LOGGING: drawGestureActivity.log
+usage: drawGestureActivity.py [-h] [-s SESSIONS [SESSIONS ...]]
+                              [-e EPISODES [EPISODES ...]]
+                              [-p PAGES [PAGES ...]] [-B BEGIN] [-E END]
+                              [-P PROJECT] [-L TEXTPERLINE]
+                              [-G GRAPHPAGELENGTH] [-X TEXTX] [-Y TEXTY]
+                              [-S TEXTSCALE] [-T TEXTPAGELENGTH] [-U] [-c]
+                              [-d] [-m] [-a] [-k] [-r] [-z] [-y] [-j]
+                              [-J TRAJECTORYPREFIXES [TRAJECTORYPREFIXES ...]]
+                              [-f OUTSUFFIX] [-C COLORPALETTEFILE]
+
+...
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SESSIONS [SESSIONS ...], --sessions SESSIONS [SESSIONS ...]
+                        Sessions to be printed.
+  -e EPISODES [EPISODES ...], --episodes EPISODES [EPISODES ...]
+                        Episodes to be printed.
+  -p PAGES [PAGES ...], --pages PAGES [PAGES ...]
+                        Pages to be printed. (relative to respective episode)
+  -B BEGIN, --begin BEGIN
+                        Index where the printing starts. (relative to
+                        respective episode)
+  -E END, --end END     Index where the printing stops. (relative to
+                        respective episode)
+  -P PROJECT, --project PROJECT
+                        The file containging this project`s descriptor.
+  -L TEXTPERLINE, --textperline TEXTPERLINE
+                        Maximum number of sequence chars printed in one line.
+                        (overrides project settings)
+  -G GRAPHPAGELENGTH, --graphpagelength GRAPHPAGELENGTH
+                        Maximum chars printed in one graphics page. (overrides
+                        project settings)
+  -X TEXTX, --textx TEXTX
+                        X position of the text line on the page. (overrides
+                        project settings)
+  -Y TEXTY, --texty TEXTY
+                        Y position of the text line on the page. (overrides
+                        project settings)
+  -S TEXTSCALE, --textscale TEXTSCALE
+                        scale factor for text size. (overrides project
+                        settings)
+  -T TEXTPAGELENGTH, --textpagelength TEXTPAGELENGTH
+                        Maximum chars printed in one text page. (overrides
+                        project settings)
+  -U, --simulate        just simulate, do not generate PDF output
+  -c, --slice           Generate each stroke on a separate page.
+  -d, --hideids         hide stroke IDs
+  -m, --hidecomments
+  -a, --hidetimestamps  hide timestamps
+  -k, --hidespeakers
+  -r, --hidephrases
+  -z, --hideheaders
+  -y, --bboxtext
+  -j, --trajectorylabels
+                        Print trajectory labels
+  -J TRAJECTORYPREFIXES [TRAJECTORYPREFIXES ...], --trajectoryprefixes TRAJECTOR
+YPREFIXES [TRAJECTORYPREFIXES ...]
+                        Prefixes to be removed from the trajectory labels.
+  -f OUTSUFFIX, --outsuffix OUTSUFFIX
+                        override the automatic output filename suffix
+  -C COLORPALETTEFILE, --colorpalettefile COLORPALETTEFILE
+                        name of a GIMP-exported *.html file containing a
+                        palette image as a table.
+
+C:\Users\Martin.Broesamle\Desktop\MultimodalCorpus\Methods+Sources\DesignExperim
+ent1\CodingData\90_Reaktor>
