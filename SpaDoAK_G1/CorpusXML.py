@@ -4,7 +4,8 @@ import logging
 
 #from Include import keyAllTS
 #from Include import
-from SkeGestEng.TranscriptIntegration.WTimelineA import AnnotatedSequence, keyPremiereTSoffset
+from ..TranscriptIntegration.WTimelineA import AnnotatedSequence, keyPremiereTSoffset
+from ._utils import InputError
 
 def attr2dict(node):
     x = {}
@@ -22,7 +23,7 @@ class CorpusDescriptorDocument(object):
 
         self.corpusdescr = self.dom.documentElement
         if self.descriptorversion != self.corpusdescr.getAttribute("descriptorversion"):
-            raise Error("Descriptor Versions do not match.")
+            raise InputError("Descriptor Versions do not match.")
 
         self.projectID = self.corpusdescr.getAttribute('id')
         self.projectDescr = self.corpusdescr.getAttribute('descr')
@@ -250,7 +251,7 @@ class XMLCorpusDocument(object):
         for iid,startTS,startIdx,stopTS,stopIdx,data,subseq in aseq:
             if data==None:
                 print ("Warning: Unrecognised IntervalType --no-data--")
-                #raise ValueError()
+                #raise InputError()
             else:
                 if data['IntervalType'] == 'STROKE':
                     intervalnode = self.dom.createElement('Stroke')
@@ -338,7 +339,7 @@ class XMLCorpusDocument(object):
         ### identify in and outpoint
         if interval:
             if inpoint or outpoint:
-                raise ValueError("you may specify *either* an episode OR inpoint and outpoint -- not both.")
+                raise InputError("you may specify *either* an episode OR inpoint and outpoint -- not both.")
             node = annode.firstChild
             found = False
             while node:
@@ -350,7 +351,7 @@ class XMLCorpusDocument(object):
                 node = node.nextSibling
 
             if not found:
-                raise ValueError("Did not find an interval %s" % interval)
+                raise InputError("Did not find an interval %s" % interval)
 
         ### fetch the first node (according to inpoint timestamp)
         if inpoint:
@@ -360,7 +361,7 @@ class XMLCorpusDocument(object):
                     found = True
                     break
             if not found:
-                raise ValueError("Did not find a timestamp %s in the sequence %s" % (inpoint,sequnceID))
+                raise InputError("Did not find a timestamp %s in the sequence %s" % (inpoint,sequnceID))
         else:
             node = seqdatanode.firstChild
 
@@ -388,7 +389,7 @@ class XMLCorpusDocument(object):
                 if node.getAttribute('timestamp') == outpoint:
                     break
             else:
-                raise ValueError("Unrecognised node type. %s" % node.nodeType)
+                raise InputError("Unrecognised node type. %s" % node.nodeType)
 
             node = node.nextSibling
 
@@ -453,7 +454,7 @@ class XMLCorpusDocument(object):
                         data = {'IntervalType':'SECTION'}
                         aseq.defineInterval(startTS,stopTS,iid=intervalID,data=data)
                 else:
-                    raise ValueError("Unrecognised tag %s." % node.tagName)
+                    raise InputError("Unrecognised tag %s." % node.tagName)
 
 
 
@@ -474,7 +475,7 @@ class XMLCorpusDocument(object):
 
         docinfo = self.dom.documentElement.getElementsByTagName("DocumentInformation")[0]
         if self.transcriptversion != docinfo.getAttribute("transcriptversion"):
-            raise Error("TranscriptVersions do not match.")
+            raise InputError("TranscriptVersions do not match.")
 
         self.trdatanode = self.dom.documentElement.getElementsByTagName("TranscriptData")[0]
 

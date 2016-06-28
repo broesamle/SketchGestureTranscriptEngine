@@ -336,7 +336,7 @@ class Visualizer(object):
             if m == marker:
                 self.textX,self.textY = self.tra.apply(x,y)
                 return
-        raise ValueError("Marker not defined! %s" % marker)
+        raise InputError("Marker not defined! %s" % marker)
 
 
     def getBBoxFromMarkers (self,marker1,marker2):
@@ -600,7 +600,7 @@ class Visualizer(object):
                     if spatElID[:len(transcriptIDprefix)] == transcriptIDprefix:
                         spatElID = spatElID [len(transcriptIDprefix):]
                     else:
-                        raise ValueError("encountered stroke with bad id prefix: %s (should be %s)" % (spatElID,transcriptIDprefix))
+                        raise InputError("encountered stroke with bad id prefix: %s (should be %s)" % (spatElID,transcriptIDprefix))
 
                 if self.lastPrintedStrokeID == spatElID:
                     continue
@@ -768,7 +768,7 @@ class Visualizer(object):
         ### both are sequences or exactly one single element
         strokedeco = copy.deepcopy(decoration)
         if not traj:
-            raise ValueError("Empty trajectory information.")
+            raise InputError("Empty trajectory information.")
 
         err = False
         if fingers=='':
@@ -799,7 +799,7 @@ class Visualizer(object):
                             ### there is an other static hand that should have been coded as a second moving hand
                             ### with two hands, one moving this is necessary because it is impossible to distinguish the moving and the
                             ### static hands based on the trajectory data + finger sequence.
-                            raise ValueError("Two hands with only one moving have to be coded as two moving hands (with one empty movement trajectory).")
+                            raise InputError("Two hands with only one moving have to be coded as two moving hands (with one empty movement trajectory).")
                         foundit = True
                         subtraj = traj[0]
                         traj = traj[1:]
@@ -817,11 +817,11 @@ class Visualizer(object):
                 ### since both hands are hands there should be no single fingers
                 if len(fingers) != 2:
                     print ("!!  Mismatching two hands gesture/ movement trajectories: %s/%s" % (fingers,traj))
-                    raise ValueError("!!  Mismatching two hands gesture/ movement trajectories: %s" % fingers)
+                    raise InputError("!!  Mismatching two hands gesture/ movement trajectories: %s" % fingers)
                 f1,f2 = fingers
                 if f1 not in self.HANDCODES or f2 not in self.HANDCODES:
                     print ("!!  Two hands gesture with incompatible finger code: %s/%s" % (f1,f1))
-                    raise ValueError("!!  Two hands gesture with incompatible finger code: %s/%s" % (f1,f1))
+                    raise InputError("!!  Two hands gesture with incompatible finger code: %s/%s" % (f1,f1))
                 h1,m1,h2,m2 = traj
                 result.append(self.drawHandShape(h1,f1,holdstart,holdstop,hold,strokedeco))
                 self.drawMovementTrajectory(m1,f1,holdstart,holdstop,hold,strokedeco)
@@ -831,7 +831,7 @@ class Visualizer(object):
             else:
                 ### there should be not more than a difference of two (two hands moving)
                 print ("!!  Mismatching fingers/trajectories: %s" % fingers)
-                raise ValueError("!!  Mismatching fingers/trajectories: %s" % fingers)
+                raise InputError("!!  Mismatching fingers/trajectories: %s" % fingers)
 
             if err:
                 x,y = resultresult[:2]
@@ -841,7 +841,7 @@ class Visualizer(object):
             ### single trajectory
             if len(fingers) != 1:
                 print ("!!  Mismatching fingers/trajectories: %s/%s" % (fingers,traj))
-                raise ValueError("!!  Mismatching fingers/trajectories: %s" % fingers)
+                raise InputError("!!  Mismatching fingers/trajectories: %s" % fingers)
 
             if fingers in self.HANDCODES:
                 return [self.drawHandShape(traj,fingers[0],holdstart,holdstop,hold,strokedeco)]
@@ -852,7 +852,7 @@ class Visualizer(object):
         handsymblinew = 3.0
 
         if traj['role'] != "HAND":
-            raise ValueError("inconcistent role for drawHandShape: %s" % traj)
+            raise InputError("inconcistent role for drawHandShape: %s" % traj)
 
         trajdeco = copy.deepcopy(decor) + [pyx.color.transparency(self.stroketransp),style.linestyle.dashdotted,style.linewidth(self.handstrokewidth)]
         symbdeco = copy.deepcopy(decor) + [style.linewidth(handsymblinew)]
@@ -1001,13 +1001,13 @@ class Visualizer(object):
             elif traj['move'] == 'ONCE':
                 markers = self.drawSymbol(symb,x,y,symbdeco2+[style.linewidth(self.symbolstrokewidth)])
             else:
-                raise ValueError("unknown movement parameter %s" % traj['move'])
+                raise InputError("unknown movement parameter %s" % traj['move'])
 
         ### do the HOLD business if necessary
         #if finger in holdstart and finger in holdstop:
         #   msg = "!!  Holdstart and hold stop for the same finger."
         #   print msg
-        #   raise ValueError(msg)
+        #   raise InputError(msg)
 
         #print "FI:%s HS:%s HO:%s"  % (finger,holdstart,hold)
         if finger in hold:

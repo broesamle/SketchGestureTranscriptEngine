@@ -25,7 +25,7 @@ class LoadedTrajManager(object):
 
     def defineTrajRessource(self,ressourceID,filename):
         if ressourceID in self.defined:
-            raise ValueError("ressource already defined %s" % ressouceID)
+            raise InputError("ressource already defined %s" % ressouceID)
 
         self.defined[ressourceID] = filename
 
@@ -112,7 +112,7 @@ class SeqProcessor(object):
                 #print ("Paper Custom Size: %d x %d mm" % (paperw,paperh))
                 self.paperFormat = pyx.document.paperformat(pyx.unit.length(paperw,"t","mm"),pyx.unit.length(paperh,"t","mm"))
             except (TypeError,ValueError):
-                raise ValueError("Custom paperFormat needs to be a 2-tuple of numbers: (width,height) in Millimeter")
+                raise InputError("Custom paperFormat needs to be a 2-tuple of numbers: (width,height) in Millimeter")
 
         self.rotated = rotatedPaper
 

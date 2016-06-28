@@ -86,7 +86,7 @@ class SVGDocument(object):
                 elif node.tagName == 'g':
                     msg = "!!  Nested Group: %s" % grouel.getAttribute('id')
                     print (msg)
-                    #raise ValueError(msg)
+                    #raise InputError(msg)
                     result = result + self.handleNestedGroup(node)
             except AttributeError:
                 pass
@@ -95,7 +95,7 @@ class SVGDocument(object):
 
     def getSodiPodiXY(self,nodeid):
         if nodeid not in self.pathnodes:
-            raise KeyError("getSodiPodiXY:Node not found %s" % nodeid)
+            raise ValueRetrieveError("getSodiPodiXY:Node not found %s" % nodeid)
         node = self.pathnodes[nodeid]
 
         return self.getXYfromSodiPodiNode(node)
@@ -104,13 +104,13 @@ class SVGDocument(object):
 
         x,y = node.getAttribute('sodipodi:cx') , node.getAttribute('sodipodi:cy')
         if x == "" or y == "":
-            raise ValueError("no valid coordinates in SodiPodi: %s " % nodeid)
+            raise ValueRetrieveError("no valid coordinates in SodiPodi: %s " % nodeid)
 
         transf = node.getAttribute('transform')
         if transf:
             m = re.match(r"translate\((\+?-?\d*\.?\d*e?-?\d?\d?),(\+?-?\d*\.?\d*e?-?\d?\d?)\)",transf)
             if not m:
-                raise ValueError("getXYfromSodiPodiNode: invalid translation.")
+                raise InputError("getXYfromSodiPodiNode: invalid translation.")
             tx,ty =  m.groups()[:2]
             tx,ty = float(tx),float(ty)
         else:
@@ -121,7 +121,7 @@ class SVGDocument(object):
 
     def getTrajDataFromNode(self,node):
         if node.tagName != 'path':
-            raise ValueError('node should be a path' % node)
+            raise InputError('node should be a path' % node)
 
         traj = {}
         traj['nodeID'] = node.getAttribute('id')
@@ -152,7 +152,7 @@ class SVGDocument(object):
                 ### stroke-dasharray:1, 6
                 traj['role'] = "DRAW-LIGHT"
             else:
-                raise ValueError("unrecognized dash pattern")
+                raise InputError("unrecognized dash pattern")
         else:
             traj['role'] = 'MOVE'
 
@@ -164,7 +164,7 @@ class SVGDocument(object):
         m2 = re.search('marker-end:url\(([#\w-]+)\)',pathstyle)
         if m1:
             if not m2:
-                raise ValueError("there should be either both or none: marker-start and marker-end")
+                raise InputError("there should be either both or none: marker-start and marker-end")
 
             arrow1 = m1.groups()[0]
             arrow2 = m2.groups()[0]
@@ -173,35 +173,35 @@ class SVGDocument(object):
             elif arrow1.find('#Arrow1Lstart') == 0 and arrow2.find('#Arrow1Lend') == 0:
                 traj['move'] = "REPEAT"
             else:
-                raise ValueError("unrecognized arrow pattern")
+                raise InputError("unrecognized arrow pattern")
         else:
             if m2:
-                raise ValueError("there should be either both or none: marker-start and marker-end")
+                raise InputError("there should be either both or none: marker-start and marker-end")
             traj['move'] = "ONCE"
 
         m1 = re.search('fill-opacity:0.392',pathstyle)
         if m1:
             if traj['move'] != 'ONCE':
-                raise ValueError("diffuse movement modifier in invalid combination with REPEAT OR OSCILLATE")
+                raise InputError("diffuse movement modifier in invalid combination with REPEAT OR OSCILLATE")
             traj['move'] = 'DIFFUSE'
 
         ### HATCHING / SCHRAFFUR
         m1 = re.search('fill:url\(#Polkadots',pathstyle)
         if m1:
             if traj['move'] != 'ONCE':
-                raise ValueError("hatch dots in invalid combination with REPEAT, OSCILLATE, DIFFUSE etc.")
+                raise InputError("hatch dots in invalid combination with REPEAT, OSCILLATE, DIFFUSE etc.")
             traj['move'] = 'HATCH_DOTS'
 
 
         m1 = re.search('fill:url\(#Wavy',pathstyle)
         if m1:
             if traj['move'] != 'ONCE':
-                raise ValueError("hatch dots in invalid combination with REPEAT, OSCILLATE, DIFFUSE etc.")
+                raise InputError("hatch dots in invalid combination with REPEAT, OSCILLATE, DIFFUSE etc.")
             traj['move'] = 'HATCH'
 
         ## doch handschlag z.b.
         #if traj['role'] == "HAND" and traj['move'] != "ONCE":
-        #   raise ValueError("Hand edge path should not have movement modifiers: role:HAND / move:%s" % traj['move'])
+        #   raise InputError("Hand edge path should not have movement modifiers: role:HAND / move:%s" % traj['move'])
 
         #print "TRAJ.move:%s" % traj['move']
         return traj

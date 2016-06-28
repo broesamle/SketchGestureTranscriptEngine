@@ -308,7 +308,7 @@ for sessID,sessDescr,people in allsessions2:
             try:
                 paperformat = map((spatialDataD['paperWidth'],patialDataD['paperHeight']), int)
             except ValueError:
-                raise ValueError("paper width and height should be integers. (unit:millimeter)")
+                raise InputError("paper width and height should be integers. (unit:millimeter)")
 
         landscape = fetchOrDefault(spatialDataD,'landscape',0,int)
         portrait = fetchOrDefault(spatialDataD,'portrait',0,int)
@@ -320,7 +320,7 @@ for sessID,sessDescr,people in allsessions2:
         elif landscape == 0 and portrait == 1:
             rotatePaper = 0
         else:
-            raise ValueError('Incompatible orientation setting: landscape="%d" and portrait="%d"' % (landscape,portrait))
+            raise InputError('Incompatible orientation setting: landscape="%d" and portrait="%d"' % (landscape,portrait))
 
         ######
         ### create a visualizer
