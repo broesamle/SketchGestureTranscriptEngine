@@ -11,6 +11,6 @@ in PDF-Dateien.
 ## Basic Usage
 --------------
 
-python -m SkeGestEng.SpaDoAK-G1.makeTr
-
+`python -m SkeGestEng.SpaDoAK_G1.makeTr`
+`python -m SkeGestEng.SpaDoAK_G1.makeTr --help` for pringing options
 
