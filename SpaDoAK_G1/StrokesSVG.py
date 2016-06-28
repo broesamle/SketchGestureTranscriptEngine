@@ -1,6 +1,8 @@
 import xml.dom.minidom as xml
 import re
 
+from ._utils import ValueRetrieveError
+
 TRAJ_ORDINARY = 1
 TRAJ_SODIPODI = 2
 

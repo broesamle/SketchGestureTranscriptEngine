@@ -362,7 +362,7 @@ for sessID,sessDescr,people in allsessions2:
                         SVGFname = loadedTraj.getLoaded(traj['resource']).filename
                         filepath = os.path.join(os.path.dirname(SVGFname),filepath)
 
-                    filepath = filepath.encode('ascii')
+                    #filepath = filepath.encode('ascii')
                     filepath = os.path.abspath(filepath)
 
                     if 'imagecoordinates' in traj and traj['imagecoordinates'] == 'X-mirrorY':

@@ -52,7 +52,7 @@ class LoadedTrajManager(object):
 
     def getLoadedInfo(self):
         infoS = ""
-        for key,val in self.loaded.iteritems():
+        for key,val in self.loaded.items():
             infoS += "[%s]%s , " % (key,val.filename)
         infoS = infoS[:-3]
         return infoS

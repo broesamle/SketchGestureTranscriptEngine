@@ -3,9 +3,11 @@ import logging
 import copy
 import os.path
 import sys
+import codecs
 
 from ..TranscriptIntegration.WTimelineA import TS_INPOINT, TS_OUTPOINT, BY_INDEX, BY_TIMESTAMP, keyPremiereTSoffset, isNativePremiereTS
 from .StrokesSVG import TRAJ_ORDINARY, TRAJ_SODIPODI
+from ._utils import ValueRetrieveError, InputError
 
 from pyx import deco,text,style,bitmap
 import pyx
@@ -324,7 +326,7 @@ class Visualizer(object):
             try:
                 x,y = svgdoc.getSodiPodiXY(marker)
                 self.markers.append((label,x,y,marker))
-            except(KeyError):
+            except(ValueRetrieveError):
                 missingmarkers.append(marker)
 
         if missingmarkers != []:
@@ -486,7 +488,7 @@ class Visualizer(object):
             ### put the text segment
             startmarker = "\\PyXMarker{anfang}"
             stopmarker = "\\PyXMarker{ende}"
-            TEXtxt =  startmarker + txt.encode('latex') + stopmarker
+            TEXtxt =  startmarker + codecs.encode(txt,'latex') + stopmarker
             TEXtxt = cleanTexInput(TEXtxt)
             logging.info("LATEX:%s" % TEXtxt)
             t = self.canvas.text(posx+speakerXsep,posy,TEXtxt)
@@ -686,7 +688,7 @@ class Visualizer(object):
                 #print "ODD:%s CURR:%s ALL:%s" % (oddStrokeCount,currStrokeCount,strokeCount)
                 if self.sliceStrokes and (oddStrokeCount or currStrokeCount == strokeCount):
                     self.drawInfoHeaders()
-                    for startTSmicro,microcan in microcanvasesByStartTS.iteritems():
+                    for startTSmicro,microcan in microcanvasesByStartTS.items():
                         self.canvas.insert(microcan)
                     self.drawMarkers()
                     Slices.append(self.canvas)
@@ -1241,17 +1243,14 @@ class SymbolMaker(object):
     def newCanvas(self,canvas):
         self.canvas = canvas
 
-
     def putText(self,x,y,text,attr=[]):
         logging.info("H-LATEX:%s" % cleanTexInput(text))
         self.canvas.text(x,y,cleanTexInput(text),attr)
-
-
+        
     def setSizeOnce(self,size):
         self.oldsize=self.size
         self.size=size
         self.rad = size/2
-
 
     def resetSize(self):
         self.size=self.oldsize
@@ -1280,14 +1279,11 @@ class SymbolMaker(object):
         self.setSizeOnce(self.size*0.7)
         self.putSymbol('bigO',x,y,decoration=decoration+[style.linewidth(4),style.dash([1.5,1.5])])
         self.resetSize()
-
-
     def put_o(self,x,y,decoration):
         rad=self.size/2
         self.canvas.stroke(pyx.path.circle(x, y, self.rad/2), decoration)
-
-    #def put_B(self,x,y,decoration):
-        #self.canvas.stroke(pyx.path.circle(x, y, rad/2), decoration)
+    def put_B(self,x,y,decoration):
+        self.canvas.stroke(pyx.path.circle(x, y, rad/2), decoration)
     def put_square(self,x,y,decoration):
         self.canvas.stroke(pyx.path.rect(x-self.rad, y-self.rad, self.size,self.size), decoration)
     def put_triangle(self,x,y,decoration):
@@ -1345,7 +1341,8 @@ class SymbolMaker(object):
 #       sc.stroke(pyx.path.line(x+self.sin20*self.rad/2,y+self.cos20*self.rad, x+self.sin20*self.rad/2,y+self.size),decoration)
         self.canvas.insert(sc, [pyx.trafo.translate(0,self.rad),pyx.trafo.rotate(50,x,y)])
 
-#    def put_omega(self,x,y,decoration):
+    def put_omega(self,x,y,decoration):
+        print ("!! put OMEGA not implemented.")
 
     def put_drawP(self,x,y,decoration):
         #print "+ + +"

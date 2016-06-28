@@ -23,7 +23,8 @@ class CorpusDescriptorDocument(object):
 
         self.corpusdescr = self.dom.documentElement
         if self.descriptorversion != self.corpusdescr.getAttribute("descriptorversion"):
-            raise InputError("Descriptor Versions do not match.")
+            print ("!!  Warning: Descriptor Versions do not match.")
+            #raise InputError("Descriptor Versions do not match.")
 
         self.projectID = self.corpusdescr.getAttribute('id')
         self.projectDescr = self.corpusdescr.getAttribute('descr')
@@ -84,7 +85,7 @@ class CorpusDescriptorDocument(object):
 
 #   def getAllTrnscrBlocks(self):
 #       result = []
-#       for bockID,bl in self.trnscrblocks.iteritems():
+#       for bockID,bl in self.trnscrblocks.items():
 #           result.append(bl)
 #       return result
 
@@ -129,14 +130,14 @@ class CorpusDescriptorDocument(object):
 
     def getAllRessources(self):
         result = []
-        for resourceID,res in self.resources.iteritems():
+        for resourceID,res in self.resources.items():
             result.append(attr2dict(res))
         return result
 
     def getAllSessions(self):
         logging.debug("getAllSessions:%s" % self.sessions )
         result = []
-        for sID,s in self.sessions.iteritems():
+        for sID,s in self.sessions.items():
             descr = s.getAttribute('descr')
             people = []
             for p in s.getElementsByTagName('Person'):
@@ -332,10 +333,9 @@ class XMLCorpusDocument(object):
         annode = trseqnode.getElementsByTagName('Annotations')[0]
         ### sequence data (text data and points in time)
         seqdatanode = trseqnode.getElementsByTagName('SequenceData')[0]
-
+        
         #sourceInfo = trseqnode.getAttribute('informal_source_info')
-
-
+        
         ### identify in and outpoint
         if interval:
             if inpoint or outpoint:
@@ -365,9 +365,7 @@ class XMLCorpusDocument(object):
         else:
             node = seqdatanode.firstChild
 
-
         aseq = AnnotatedSequence("")
-
         while node:
             #print ((node,node.nodeType))
             if node.nodeType == node.TEXT_NODE:
@@ -390,15 +388,10 @@ class XMLCorpusDocument(object):
                     break
             else:
                 raise InputError("Unrecognised node type. %s" % node.nodeType)
-
             node = node.nextSibling
 
-
         ### annotations (intervals)
-
-
         logging.info("getTranscriptSequnce:processing Annotations...")
-
         node = annode.firstChild
         while node:
             if node.nodeType == node.ELEMENT_NODE:
@@ -433,8 +426,6 @@ class XMLCorpusDocument(object):
                         if spatialElementID:
                             data['spatialElementID'] = spatialElementID
 
-
-
                 elif node.tagName == 'Speaker':
                     intervalID, startTS, stopTS = node.getAttribute('id'), node.getAttribute('startTS'), node.getAttribute('stopTS')
                     if aseq.existsTimestamp(startTS) and aseq.existsTimestamp(stopTS):
@@ -455,16 +446,7 @@ class XMLCorpusDocument(object):
                         aseq.defineInterval(startTS,stopTS,iid=intervalID,data=data)
                 else:
                     raise InputError("Unrecognised tag %s." % node.tagName)
-
-
-
-#           try:    ### sowas ist richtiger mist!!
-###                 sowas filtert einfach zu viele fehler !!!
-#           except AttributeError:
-#               pass
-
             node = node.nextSibling
-
         return aseq
 
 
@@ -484,9 +466,6 @@ class XMLCorpusDocument(object):
             sequenceID = trseqnode.getAttribute('id')
             self.trseqnodes[sequenceID] = trseqnode
 
-
-
-
     def writeXMLfile(self,filename,addindent='',newl=''):
         f = open(filename,'w')
         s = self.dom.toprettyxml(indent=addindent,newl=newl,encoding='utf-8')
@@ -495,5 +474,3 @@ class XMLCorpusDocument(object):
         #self.dom.writexml(f,addindent=addindent,newl=newl,encoding='utf-8')
         f.write(s)
         f.close()
-
-

@@ -398,7 +398,7 @@ class AnnotatedSequence(IntervalTimeline):
             logging.debug("slicing BY_INDEX")
 
             if b == None:       b = len(self.seq)
-            for ts,idx in self.pointIdxByTS.iteritems():
+            for ts,idx in self.pointIdxByTS.items():
                 #logging.debug("iterSegments(%d,%d): ts,idx=(%s,%d)" % (a,b,ts,idx) )
                 #print ( "testing" + str((ts,idx)) )
                 if a <= idx and idx <= b:
@@ -415,7 +415,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         elif slicing == BY_TIMESTAMP:
             logging.debug("slicing BY_TIMESTAMP")
-            for ts,idx in self.pointIdxByTS.iteritems():
+            for ts,idx in self.pointIdxByTS.items():
                 if a <= timestampKey(ts) and timestampKey(ts) <= b:
                     plist.append((ts,idx))
 
@@ -563,7 +563,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         #logging.debug("removePartSeq:%s" % str(self.pointTSByIdx))
         ############ old implementation working without        pointTSByIdx
-        #       for timestamp,index in self.pointIdxByTS.iteritems():
+        #       for timestamp,index in self.pointIdxByTS.items():
         #           if index > a:           ## index points to somewhere in or behind the removed part
         #               #logging.debug("ASeq:removePartSeq(%d,%d):pointMoves (%s,%d)" % (a,b,point,index))
         #
@@ -589,7 +589,7 @@ class AnnotatedSequence(IntervalTimeline):
         self.seq.insert(insertidx,seq)
 
         ############ old implementation working without        pointTSByIdx
-        #       for timestamp,insertindex in self.pointIdxByTS.iteritems():
+        #       for timestamp,insertindex in self.pointIdxByTS.items():
         #           if index > insertidx:   ## index points to somewhere in or behind new part
         #               self.pointIdxByTS[timestamp]  += (b - a)    # increase it by the size of the removed part
 
@@ -618,7 +618,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         ###
         ### Intervals BY START
-        for startTS, IIDs in self.intervalsByStart.iteritems():
+        for startTS, IIDs in self.intervalsByStart.items():
             for iid in IIDs:
                 if iid not in self.intervalsByID:
                     raise ValueError("Inconsistency intervalsByStart/intervalsByID:" + iid)
@@ -630,7 +630,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         ###
         ### intervals BY STOP
-        for stopTS, IIDs in self.intervalsByStop.iteritems():
+        for stopTS, IIDs in self.intervalsByStop.items():
             for iid in IIDs:
                 if iid not in  self.intervalsByID:
                     raise ValueError("Inconsistency intervalsByStop/intervalsByID:" + iid)
@@ -642,7 +642,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         ###
         ### intervals BY ID
-        for iid,(startTS,stopTS) in self.intervalsByID.iteritems():
+        for iid,(startTS,stopTS) in self.intervalsByID.items():
             ### interval id order
             if iid not in self.intervalIDorder:
                 raise ValueError("Inconsistency intervalsByID/intervalIDorder:" + iid )
@@ -675,7 +675,7 @@ class AnnotatedSequence(IntervalTimeline):
 
 
 
-        for ts,idx in self.pointIdxByTS.iteritems():
+        for ts,idx in self.pointIdxByTS.items():
             if idx not in self.pointTSByIdx:
                 raise ValueError("Inconsistency IDX/TS:" + ts)
             else:
@@ -688,7 +688,7 @@ class AnnotatedSequence(IntervalTimeline):
 
         allTSs = []
 
-        for idx,TSs in self.pointTSByIdx.iteritems():
+        for idx,TSs in self.pointTSByIdx.items():
             for ts in TSs:
                 if ts not in self.pointIdxByTS:
                     raise ValueError("Inconsistency TS/IDX:" + str(idx))
@@ -717,7 +717,7 @@ class ASeqIntervalIter(object):
         self.aseq = annosequence
         logging.debug("new interval iterator: " % self.idlist)
 
-    def next(self):
+    def __next__(self):
         ### is this the end??
         if len(self.idlist) == 0:
             raise StopIteration
@@ -756,7 +756,7 @@ class ASeqSegmentIter(object):
 
         self.goOn = True
 
-    def next(self):
+    def __next__(self):
         ### is this the end??
         if not self.goOn:
             raise StopIteration
