@@ -24,11 +24,11 @@ logging.info("Begin logs...")
 print ("----------------- SpaDoAK-G1 (v02) -----------------")
 print ("LOGGING: " + LOG_FILENAME)
 
-from WTimelineA import AnnotatedSequence
-from WotilitiesA import fetchIfNotDef, fetchOrDefault
-from CorpusXML import XMLCorpusDocument, CorpusDescriptorDocument
-from Visualizer import Visualizer
-from procSeq2PDF import SeqProcessor,LoadedTrajManager
+from ..TranscriptIntegration.WTimelineA import AnnotatedSequence
+from ._utils import fetchIfNotDef, fetchOrDefault
+from .CorpusXML import XMLCorpusDocument, CorpusDescriptorDocument
+from .Visualizer import Visualizer
+from .procSeq2PDF import SeqProcessor,LoadedTrajManager
 
 ################################################
 ### Get Commandline Options
@@ -289,12 +289,9 @@ for sessID,sessDescr,people in allsessions2:
         ################################################
         # # #   Bei gelegenheit anpassen -- nicht heute, grad laeufts --
 
-
-
         textPerLine = fetchIfNotDef(textPerLineArg,spatialDataD,'textperline',textPerLineDefault,int)
         textPageLen = fetchIfNotDef(textPageLenArg,spatialDataD,'textpagelen',textPerLine*9,int)
         graphPageLen = fetchIfNotDef(graphPageLenArg,spatialDataD,'graphpagelen',textPerLine,int)
-
 
         textScale = fetchIfNotDef(textScaleArg,spatialDataD,'textscale',1.0,float)
 
@@ -303,7 +300,6 @@ for sessID,sessDescr,people in allsessions2:
 
         errx = fetchOrDefault(spatialDataD,'errx',None,int)
         erry = fetchOrDefault(spatialDataD,'erry',None,int)
-
 
         if 'paperFormat' in spatialDataD:
             paperformat = spatialDataD['paperFormat']
