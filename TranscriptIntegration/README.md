@@ -1,5 +1,6 @@
-### Transcript Integration -- Build The Corpus
-==============================================
+
+Transcript Integration -- Build The Corpus
+==========================================
 
 `integrateCorpusData.py`
 
@@ -8,14 +9,11 @@ Integration der
 * Video-Annotationen (Adobe PRemiere/`*.PRPRJ`)
 in eine XML-Datei für die Sequentiellen Daten -- d.h. Text, Zeitmarken, Gesten-Intervalle etc...
 
-## Dependencies
+Dependencies
+------------
 
 * pyx - for PDF output
+
 * LatexCodec.py - currently installed based on an early download by david.eppstein@gmail.com
 
-## Additional Modules 
----------------------
-
-used outside `TranscriptIntegration`:
-
-* `WTimelineA`
+* `WTimelineA` used outside `TranscriptIntegration`
