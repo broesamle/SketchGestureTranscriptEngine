@@ -24,7 +24,7 @@ logging.info("Begin logs...")
 print ("----------------- SpaDoAK-G1 (v02) -----------------")
 print ("LOGGING: " + LOG_FILENAME)
 
-from ..TranscriptIntegration.WTimelineA import AnnotatedSequence
+from .TranscriptIntegration.WTimelineA import AnnotatedSequence
 from ._utils import fetchIfNotDef, fetchOrDefault
 from .CorpusXML import XMLCorpusDocument, CorpusDescriptorDocument
 from .Visualizer import Visualizer

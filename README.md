@@ -14,8 +14,30 @@ Currently unmaintained.
 The software was used for data analysis of video-recorded architectural design sessions.
 
 
+Installation
+------------
+
+Somewhere in a useful folder or directory...
+
+1. Download and unpack the archive from https://github.com/broesamle/spadoak/archive/master.zip 
+
+*OR* clone the repository:
+
+`git clone git clone https://github.com/broesamle/spadoak.git`
+
+2. Install locally as an editable python package using `pip`:
+
+`pip install -e spadoak/`
+
+
 `./spadoak` (the package directory)
 -----------------------------------
+
+Usage:
+
+`python -m spadoak.makeTr`
+
+`python -m spadoak.makeTr --help` for pringing options
 
 + Combine verbal and spatial annotation data into human readable form.
 

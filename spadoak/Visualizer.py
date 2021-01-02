@@ -5,12 +5,14 @@ import os.path
 import sys
 import codecs
 
-from ..TranscriptIntegration.WTimelineA import TS_INPOINT, TS_OUTPOINT, BY_INDEX, BY_TIMESTAMP, keyPremiereTSoffset, isNativePremiereTS
+from .TranscriptIntegration.WTimelineA import TS_INPOINT, TS_OUTPOINT, BY_INDEX, BY_TIMESTAMP, keyPremiereTSoffset, isNativePremiereTS
 from .StrokesSVG import TRAJ_ORDINARY, TRAJ_SODIPODI
 from ._utils import ValueRetrieveError, InputError
 
 from pyx import deco,text,style,bitmap
 import pyx
+import latexcodec
+
 
 pathToMyself,Myself = os.path.split(__file__)
 
@@ -59,10 +61,6 @@ def cleanTexInput(s):
 #   rr = rr.replace("\\","-")
 #   return r+rr
 
-
-import LatexCodec
-
-LatexCodec.register()
 
 #############################################
 ### VISUALIZER
@@ -488,7 +486,7 @@ class Visualizer(object):
             ### put the text segment
             startmarker = "\\PyXMarker{anfang}"
             stopmarker = "\\PyXMarker{ende}"
-            TEXtxt =  startmarker + codecs.encode(txt,'latex') + stopmarker
+            TEXtxt =  startmarker + codecs.encode(txt,'latex').decode('utf8') + stopmarker
             TEXtxt = cleanTexInput(TEXtxt)
             logging.info("LATEX:%s" % TEXtxt)
             t = self.canvas.text(posx+speakerXsep,posy,TEXtxt)

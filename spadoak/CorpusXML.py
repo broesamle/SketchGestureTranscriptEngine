@@ -4,7 +4,7 @@ import logging
 
 #from Include import keyAllTS
 #from Include import
-from ..TranscriptIntegration.WTimelineA import AnnotatedSequence, keyPremiereTSoffset
+from .TranscriptIntegration.WTimelineA import AnnotatedSequence, keyPremiereTSoffset
 from ._utils import InputError
 
 def attr2dict(node):
