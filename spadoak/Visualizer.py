@@ -13,9 +13,7 @@ from pyx import deco,text,style,bitmap
 import pyx
 import latexcodec
 
-
 pathToMyself,Myself = os.path.split(__file__)
-
 
 
 ################################################
@@ -27,10 +25,8 @@ pathToMyself,Myself = os.path.split(__file__)
 
 textBaseScale = 5
 
-
 coordinateBaseScale = 0.1
 pyx.unit.set(uscale=coordinateBaseScale)
-
 
 
 #############################################

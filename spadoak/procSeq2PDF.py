@@ -1,3 +1,9 @@
+"""
+This module handles main Input/Output Files, Document/Page-related Visualisation Issues, Sequence processing according to page settings.
+E.g. page sizes, text line lenghts etc. define how a long sequence has to be split up into smaller ones, which information has to be displayed on each page ...
+"""
+
+
 import xml.dom.minidom as xml
 import pyx
 import logging
@@ -6,13 +12,6 @@ import os.path
 from .StrokesSVG import SVGDocument
 
 import datetime
-
-
-"""
-This module handles main Input/Output Files, Document/Page-related Visualisation Issues, Sequence processing according to page settings.
-E.g. page sizes, text line lenghts etc. define how a long sequence has to be split up into smaller ones, which information has to be displayed on each page ...
-"""
-
 
 def texIfyParam(t):
     t = t.replace(r'_',r'\_')

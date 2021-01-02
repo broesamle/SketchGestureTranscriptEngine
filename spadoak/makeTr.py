@@ -4,7 +4,6 @@
 
 from operator import itemgetter
 import xml.dom.minidom as xml
-#import pyx         ### no need for pyx any more: stuff seems to be encapsulated in Visualiser
 import os.path
 import copy
 import re
