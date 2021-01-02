@@ -54,6 +54,7 @@ parser.add_argument('-T','--textpagelength', type=int, default=None, help='Maxim
 
 parser.add_argument('-U','--simulate', action='store_true', help='just simulate, do not generate PDF output')
 parser.add_argument('-c','--slice', action='store_true', help='Generate each stroke on a separate page.')
+parser.add_argument('-l','--split', action='store_true', help='Split output pages into separate files.')
 
 parser.add_argument('-d','--hideids', action='store_true', help='hide stroke IDs')
 parser.add_argument('-m','--hidecomments', action='store_true', help='')
@@ -150,8 +151,7 @@ if sessionsArg != []:
 else:
     allsessions2 = allsessions
 
-
-seqproc = SeqProcessor (None,loadedTraj)
+seqproc = SeqProcessor (None, loadedTraj, splitPagesToFiles=args.split)
 for sessID,sessDescr,people in allsessions2:
     sessionInfo = "[%s]%s" % (sessID,sessDescr)
 
@@ -337,7 +337,8 @@ for sessID,sessDescr,people in allsessions2:
                         hideInfoHeader=args.hideheaders,
                         sliceStrokes=args.slice,
                         colorPaletteFN=args.colorpalettefile,
-                        textScale=textScale,hideColouredFormatBars=args.hidecolouredformatbars)
+                        textScale=textScale,
+                        hideColouredFormatBars=args.hidecolouredformatbars)
 
 
         speakerpseudonyms = [pseudonym for id,pseudonym,role in people]

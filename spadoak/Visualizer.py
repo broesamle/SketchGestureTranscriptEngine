@@ -67,11 +67,29 @@ def cleanTexInput(s):
 #############################################
 
 class Visualizer(object):
-    def __init__(self, pyxCanvas,
-                xfactor=1,xoffset=0,yfactor=1,yoffset=0,
-                lineLen=100, strokewidth=3.0, textX=0, textY=0, errX=None, errY=None,
-                hideIDs=False,hideComments=False,hideTSs=False,hideSpeakers=False,hidePhrases=False,hideInfoHeader=False,sliceStrokes=False,colorPaletteFN="",
-                textScale=1.0,progressFeedback=True,hideColouredFormatBars=False):
+    def __init__(self,
+        pyxCanvas,
+        xfactor=1,
+        xoffset=0,
+        yfactor=1,
+        yoffset=0,
+        lineLen=100,
+        strokewidth=3.0,
+        textX=0,
+        textY=0,
+        errX=None,
+        errY=None,
+        hideIDs=False,
+        hideComments=False,
+        hideTSs=False,
+        hideSpeakers=False,
+        hidePhrases=False,
+        hideInfoHeader=False,
+        sliceStrokes=False,
+        colorPaletteFN="",
+        textScale=1.0,
+        progressFeedback=True,
+        hideColouredFormatBars=False):
 
         """ Does the actual drawing, currently in a PyX Canvas.
             xfactor=1,xoffset=0,yfactor=1,yoffset=0     Transformation for PyX

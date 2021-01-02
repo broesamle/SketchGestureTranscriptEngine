@@ -88,13 +88,17 @@ class SeqProcessor(object):
     predefinedPaperFormats['A1'] = pyx.document.paperformat.A1
     predefinedPaperFormats['A0'] = pyx.document.paperformat.A0
 
-
-
-    def __init__(self,visualizer,loadedtrajectories,paperFormat="A4",rotatedPaper=1):
+    def __init__(self,
+                 visualizer,
+                 loadedtrajectories,
+                 paperFormat="A4",
+                 rotatedPaper=1,
+                 splitPagesToFiles=False):
         self.setVisualizer(visualizer)
         self.loadedTraj = loadedtrajectories
         self.setPaperFormat(paperFormat,rotatedPaper)
-
+        self.split = splitPagesToFiles
+        self.doccounter = 1
 
     def setVisualizer(self,v):
         self.vis = v
@@ -117,9 +121,47 @@ class SeqProcessor(object):
                 fittosize=1,rotated=self.rotated,bbox=bbox)
         return page
 
+    def _startdoc(self, PDFpath=None, PDFfname=None):
+        logging.info ("Making new PDF (%d)." % self.doccounter)
+        self.pdfDoc = pyx.document.document(pages=[])
+        if PDFpath is not None:
+            self.PDFpath = PDFpath
+        if PDFfname is not None:
+            self.PDFfname = PDFfname
+        # print ("NEW PDF-DOC:%s  PAGES:%s" % (pdfDoc, pdfDoc.pages))
 
-    def processAnnotatedSequence(self,aseq,PDFfname,PDFpath,textPageLen,graphPageLen,inIdx=0,outIdx=0,selectedPages=[],outputFileSuffix=None,
-        transcrIdPrefix="",spatialIdPrefix="",simulate=False,backgroundPage=False,bbox=None,bboxtext=False):
+    def _procpage(self, page):
+        logging.info ("Writing one page to PDF (%d)." % self.doccounter)
+        self.pdfDoc.append (page)
+        if self.split:
+            self._enddoc()
+            self.doccounter += 1
+            self._startdoc()
+
+    def _enddoc(self):
+        if self.split:
+            fname = "%s_p%04d" % (self.PDFfname, self.doccounter)
+        else:
+            fname = self.PDFfname
+        print ("output file: FN:%s  PATH:%s" % (fname,self.PDFpath))
+        self.pdfDoc.writePDFfile(os.path.join(self.PDFpath,fname))
+
+    def processAnnotatedSequence(self,
+                                 aseq,
+                                 PDFfname,
+                                 PDFpath,
+                                 textPageLen,
+                                 graphPageLen,
+                                 inIdx=0,
+                                 outIdx=0,
+                                 selectedPages=[],
+                                 outputFileSuffix=None,
+                                 transcrIdPrefix="",
+                                 spatialIdPrefix="",
+                                 simulate=False,
+                                 backgroundPage=False,
+                                 bbox=None,
+                                 bboxtext=False):
 
         """ The function processes an annotated sequence into a PDF file using a given visualiser.
         inIdx/outIdx are used to slice within that sequence. The function is used for reacting on precise begin/end parameters by the user
@@ -146,11 +188,22 @@ class SeqProcessor(object):
         lastPrintPos = inIdx
         pagecounter = 1
 
-        if not simulate:
-            logging.info ("Making new PDF Document.")
-            pdfDoc = pyx.document.document(pages=[])
-            print ("NEW PDF-DOC:%s  PAGES:%s" % (pdfDoc, pdfDoc.pages))
+        if not outputFileSuffix:
+            if printRegion:
+                try:
+                    PDFfname += '.%05d+%d' % (inIdx,outIdx-inIdx)
+                except NameError:
+                    try:
+                        PDFfname += '.%05d' % inIdx
+                    except NameError:
+                        PDFfname += '.Region'
+            if selectedPages != []:
+                PDFfname += '.PageExtr'
+        else:
+            PDFfname += outputFileSuffix
 
+        if not simulate:
+            self._startdoc(PDFpath, PDFfname)
         textPresent = False
         print ("    %d...%d / %d" % (lastPrintPos, currstop, printOutIdx))
         while lastPrintPos < printOutIdx:
@@ -193,7 +246,7 @@ class SeqProcessor(object):
                                 page = self.canvas2page(can,bbox)
                             else:
                                 page = self.canvas2page(can,bbox=None)
-                            pdfDoc.append ( page )
+                            self._procpage(page)
                     else:
                         print ("    simulated page %d" % pagecounter)
                 else:
@@ -220,9 +273,8 @@ class SeqProcessor(object):
                         self.vis.drawInfoHeaders()
                         print ("    appending page %d" % pagecounter)
                         for can in drawnCanvases:
-                            print ("    slice")
                             page = self.canvas2page(can,bbox)
-                            pdfDoc.append ( page )
+                            self._procpage(page)
                     else:
                         print ("    simulated page %d" % pagecounter)
                 else:
@@ -236,29 +288,12 @@ class SeqProcessor(object):
                 textPresent = True
             currstop += graphPageLen
 
-        if not outputFileSuffix:
-            if printRegion:
-                try:
-                    PDFfname += '.%05d+%d' % (inIdx,outIdx-inIdx)
-                except NameError:
-                    try:
-                        PDFfname += '.%05d' % inIdx
-                    except NameError:
-                        PDFfname += '.Region'
-
-
-            if selectedPages != []:
-                PDFfname += '.PageExtr'
-        else:
-            PDFfname += outputFileSuffix
-
         if not simulate:
             if backgroundPage:
                 #self.vis.setMetaData(" "," "," "," ")
                 can = self.vis.createBackgroundPage()
                 page = self.canvas2page(can,bbox)
-                pdfDoc.append ( page )
-
+                self._procpage(page)
             paramInfo = ""
             paramInfo += "****************************************SpaDoAK-G1 PDF Output::************************************************************************************\n"
             dateNtime = datetime.datetime.today().isoformat()
@@ -288,10 +323,9 @@ class SeqProcessor(object):
                     canv.text(pyx.unit.x_pt*-2,textY,texIfyParam(par),[pyx.text.halign.right])
                     canv.text(pyx.unit.x_pt*7,textY,texIfyParam(val),[pyx.text.halign.left])
                     textY -= pyx.unit.x_pt * 15
-            pdfDoc.append ( pyx.document.page(canv,paperformat=self.paperFormat,margin=1*pyx.unit.t_cm,fittosize=1,rotated=1) )
-
-
-        PDFfnamepath = os.path.join(PDFpath,PDFfname)
-
-        print ("output file: FN:%s  PATH:%s" % (PDFfname,PDFpath))
-        pdfDoc.writePDFfile(PDFfnamepath)
+            self._procpage(pyx.document.page(canv,
+                                             paperformat=self.paperFormat,
+                                             margin=1*pyx.unit.t_cm,
+                                             fittosize=1,
+                                             rotated=1))
+        self._enddoc()
