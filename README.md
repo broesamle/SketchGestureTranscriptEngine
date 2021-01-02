@@ -1,6 +1,11 @@
 
-Spatial Annotation of Gestures and Sketches
-===========================================
+
+SpaDoAK: Spatial Domain Annotation Kit
+======================================
+
+**Annotation of Gestures and Sketches**
+
+by Martin Brösamle
 
 Initially developed for internal use at SFB/TR8, Spatial Cognition.
 Currently unmaintained.
@@ -9,8 +14,8 @@ Currently unmaintained.
 The software was used for data analysis of video-recorded architectural design sessions.
 
 
-`./SpaDoAK_G1` (Spatial Domain Annotation Kit : )
--------------------------------------------------
+`./spadoak` (the package directory)
+-----------------------------------
 
 + Combine verbal and spatial annotation data into human readable form.
 
