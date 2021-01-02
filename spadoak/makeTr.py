@@ -412,15 +412,12 @@ for sessID,sessDescr,people in allsessions2:
         v.eraseMetaData()
         v.setMetaData(project=projectInfo,session=sessionInfo, episode=episodeInfo, spatial=spatialInfo, sequence=trnscrseqInfo)
 
-
-
         ### above inpoint outpoint and intevalID should have been set
         ### based on the EPISODE DEFINITION in the PROJECT
         ### aseq now contains that episode
         ### the users parameters will be interpreted relative to the episode
 
         ### inpoitn and outpoint are thus
-
 
         seqproc.setVisualizer(v)
         seqproc.setPaperFormat(paperformat,rotatePaper)

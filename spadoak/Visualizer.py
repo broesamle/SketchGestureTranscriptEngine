@@ -230,7 +230,6 @@ class Visualizer(object):
 
     def transform(self,x,y):
         x1,y1 = (x*self.xfactor+self.xoffset , y*self.yfactor+self.yoffset)
-
         return x1,y1
 
     def eraseMetaData(self):
@@ -693,7 +692,7 @@ class Visualizer(object):
                     print ("newCanvas (final). ")
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
-                    
+
             elif intervaldata['IntervalType'] == 'PHRASE' and not self.sliceStrokes and not self.hidePhrases:
                 ### never needed interval ids printed really
                 self.canvas.stroke(pyx.path.line(startX,startY+self.phraseYoff,stopX,stopY+self.phraseYoff),
@@ -758,10 +757,10 @@ class Visualizer(object):
         fingers = intervaldata['fingers']
         if 'holdstart' in intervaldata:     holdstart = intervaldata['holdstart']
         else:                               holdstart = ""
-            
+
         if 'holdstop' in intervaldata:      holdstop = intervaldata['holdstop']
         else:                               holdstop = ""
-            
+
         if 'hold' in intervaldata:          hold = intervaldata['hold']
         else:                               hold = ""
 
@@ -1244,7 +1243,7 @@ class SymbolMaker(object):
     def putText(self,x,y,text,attr=[]):
         logging.info("H-LATEX:%s" % cleanTexInput(text))
         self.canvas.text(x,y,cleanTexInput(text),attr)
-        
+
     def setSizeOnce(self,size):
         self.oldsize=self.size
         self.size=size

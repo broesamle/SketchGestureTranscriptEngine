@@ -57,13 +57,10 @@ class LoadedTrajManager(object):
         infoS = infoS[:-3]
         return infoS
 
-
     def loadunloadTrajRessources(self,listOfRessourceIDs):
         """ basically this method ensures that no unnecessary loading and unloading of spatial data occurs.
         it is not exacly trivial since a set of several trajectory files can be loaded at the same time."""
-
         includeImage = None
-
         oldSet = set(self.loaded.keys())
         newSet = set([])
         for resID in listOfRessourceIDs:
@@ -83,7 +80,6 @@ class SeqProcessor(object):
         written to a PyX document; possibly slitting it up into multiple pages.
         All the page/document handling is located here.
         """
-
 
     predefinedPaperFormats = {}
     predefinedPaperFormats['A4'] = pyx.document.paperformat.A4
@@ -156,7 +152,6 @@ class SeqProcessor(object):
             print ("NEW PDF-DOC:%s  PAGES:%s" % (pdfDoc, pdfDoc.pages))
 
         textPresent = False
-
         print ("    %d...%d / %d" % (lastPrintPos, currstop, printOutIdx))
         while lastPrintPos < printOutIdx:
             #logging.info ("processing interval %s: %s/%d..%s/%d  %s" %  (iid,startTS,startIdx,stopTS,stopIdx,data) )
@@ -258,7 +253,6 @@ class SeqProcessor(object):
             PDFfname += outputFileSuffix
 
         if not simulate:
-
             if backgroundPage:
                 #self.vis.setMetaData(" "," "," "," ")
                 can = self.vis.createBackgroundPage()
@@ -267,7 +261,6 @@ class SeqProcessor(object):
 
             paramInfo = ""
             paramInfo += "****************************************SpaDoAK-G1 PDF Output::************************************************************************************\n"
-
             dateNtime = datetime.datetime.today().isoformat()
             da,ti = dateNtime.split('T')
             paramInfo += "Date / Time:: %s / %s\n" % (da,ti)
@@ -282,7 +275,6 @@ class SeqProcessor(object):
             paramInfo += self.vis.getVisualizerInfo()
             paramInfo += "\n"
             paramInfo += "spatialData::%s" % self.loadedTraj.getLoadedInfo()
-
             canv = pyx.canvas.canvas()
             textY = 1000
             for param in paramInfo.split('\n'):
@@ -292,7 +284,6 @@ class SeqProcessor(object):
                     except(ValueError):
                         par = param
                         val = ""
-
                     canv.text(0,textY,':')
                     canv.text(pyx.unit.x_pt*-2,textY,texIfyParam(par),[pyx.text.halign.right])
                     canv.text(pyx.unit.x_pt*7,textY,texIfyParam(val),[pyx.text.halign.left])
