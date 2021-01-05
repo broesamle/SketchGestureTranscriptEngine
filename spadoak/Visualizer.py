@@ -34,11 +34,7 @@ pyx.unit.set(uscale=coordinateBaseScale)
 #############################################
 
 def cleanTexInput(s):
-    #print s
-    r = s.replace("_","\_")
-    r = r.replace("^"," ")
-    #print r
-    return r
+    return s.replace("^"," ")
 
 #def texIfy(s):
 #   print
@@ -101,7 +97,7 @@ class Visualizer(object):
         pyx.unit.set(xscale=textBaseScale*textScale)
 
         ### for double slicing
-        self.doubleSlice = True
+        self.doubleSlice = False
         self.lastPrintedStrokeID = ""
 
 
@@ -324,7 +320,6 @@ class Visualizer(object):
         sc.text(x+width-2*margin,y+dist,cleanTexInput(string2),[text.halign.boxright])
         logging.info("C-LATEX:%s" % cleanTexInput(string3))
         sc.text(x+margin,y,cleanTexInput(string3))
-
         self.canvas.insert(sc, transf)
 
 
@@ -481,27 +476,22 @@ class Visualizer(object):
         ### as soon as a new one starts or an interval stops a segment border (and a timestamp) should be reached.
         for x in aseq.iterSegments(inpointIdx,outpointIdx,sortPoints=BY_TIMESTAMP,pointKey=keyPremiereTSoffset):
             if self.progressFeedback:   sys.stdout.write("+")
-
             startTS,startIdx,stopTS,stopIdx,txt = x
             if self.sliceStrokes:
-                print ("MICROCANVAS: [%s] %s" % (startTS , self.canvas))
+                #print ("MICROCANVAS: [%s] %s" % (startTS , self.canvas))
                 microcanvasesStack.append(self.canvas)
                 microcanvasesByStartTS[startTS] = self.canvas
-
             #logging.debug("iteratint segments for printing" % x)
             #txt = seq.getLayer('text')
-
             logging.info( "printing Segment: " + txt )
             logging.info("(%s,%d)-(%s,%d)" % (startTS,startIdx,stopTS,stopIdx))
             if self.progressFeedback:   sys.stdout.write(txt)
             #marker = markerIfy(stopTS)
-
             ### put the text segment
             startmarker = "\\PyXMarker{anfang}"
             stopmarker = "\\PyXMarker{ende}"
             TEXtxt =  startmarker + codecs.encode(txt,'latex').decode('utf8') + stopmarker
             TEXtxt = cleanTexInput(TEXtxt)
-            logging.info("LATEX:%s" % TEXtxt)
             t = self.canvas.text(posx+speakerXsep,posy,TEXtxt)
 
             ### after printing the text of the segment we save the
@@ -551,23 +541,17 @@ class Visualizer(object):
         ### then the corresponding text positions (timestamps, see above) are found and
         ### the interval is marked on the text.
         if self.sliceStrokes:
-            print ("newCanvas (final). ")
             self.newCanvas()
-
             strokeCount = 0
             if self.doubleSlice:
                 for iid,startTS,startIdx,stopTS,stopIdx,intervaldata,subseq in aseq:
                     if intervaldata['IntervalType'] == 'STROKE':
-
                         if stopIdx < inpointIdx or startIdx > outpointIdx:
                             continue        ## in this case, the interval is completely irrelevant
-
                         ### check whether it starts earlier
                         if startIdx < inpointIdx:
                             continue
-
                         strokeCount += 1
-
 
         currStrokeCount = 0
         oddStrokeCount = True
@@ -703,7 +687,6 @@ class Visualizer(object):
                         self.canvas.insert(microcan)
                     self.drawMarkers()
                     Slices.append(self.canvas)
-                    print ("newCanvas (final). ")
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
 
