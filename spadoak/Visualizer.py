@@ -300,16 +300,8 @@ class Visualizer(object):
         return pyx.bbox.bbox(llx_pt=min(x1,x2),lly_pt=min(y1,y2),urx_pt=max(x1,x2),ury_pt=max(y1,y2))
 
     def drawMarkers(self):
-        #self.theSpecialNumber += 1
-        #self.canvas.text(100,300,"**********************DRAW MARKERS %s %d" % (self.markers,self.theSpecialNumber))
-        #print "**********************DRAW MARKERS %s %d" % (self.markers,self.theSpecialNumber)
-        #print "KKKK %s" %  onlyLabel
         for label,x,y,m in self.markers:
-            #self.canvas.text(100,320,"MARKER B")
-            ### used transform earlier
             x,y = self.tra.apply(x,y)
-            #self.canvas.text(x,y,"MARKER F %s %s %s %d" %(x,y,label,self.theSpecialNumber))
-            #print "MARKER F %s %s %s %d" %(x,y,label,self.theSpecialNumber)
             self.symbaker.putText(x+5,y,label)
             self.symbaker.putCross(x,y,8,[pyx.color.rgb.green])
         if self.dims is not None:
