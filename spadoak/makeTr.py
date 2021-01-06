@@ -44,6 +44,8 @@ parser.add_argument('-L','--textperline', type=int, default=None, help='Maximum 
 parser.add_argument('-G','--graphpagelength', type=int, default=None, help='Maximum chars printed in one graphics page. (overrides project settings)')
 parser.add_argument('-X','--textx', type=int, default=None, help='X position of the text line on the page. (overrides project settings)')
 parser.add_argument('-Y','--texty', type=int, default=None, help='Y position of the text line on the page. (overrides project settings)')
+parser.add_argument('-D','--dims', type=str, default=None, help='add graphical dimension markers. (--dims=minX,minY,maxX,maxY)')
+
 parser.add_argument('-S','--textscale', type=float, default=None, help='scale factor for text size. (overrides project settings)')
 parser.add_argument('-T','--textpagelength', type=int, default=None, help='Maximum chars printed in one text page. (overrides project settings)')
 parser.add_argument('-U','--simulate', action='store_true', help='just simulate, do not generate PDF output')
@@ -92,6 +94,11 @@ if args.hideall:
     args.hidephrases = True
     args.hidespeakers = True
     args.hidetimestamps = True
+
+if args.dims is not None:
+    graphicalDimensions = [ float(dim) for dim in args.dims.split(',') ]
+else:
+    graphicalDimensions = None
 
 ### if neither command line option nor project file define text per line
 # this value will be used.
@@ -286,22 +293,21 @@ for sessID,sessDescr,people in allsessions2:
         ######
         ### create a visualizer
         ######
-        v = Visualizer( pyxCanvas=None,
-                        lineLen=textPerLine,
-                        textX=textX, textY=textY,
-                        errX=errx, errY=erry,
-                        hideIDs=args.hideids,
-                        hideComments=args.hidecomments,
-                        hideTSs=args.hidetimestamps,
-                        hideSpeakers=args.hidespeakers,
-                        hidePhrases=args.hidephrases,
-                        hideInfoHeader=args.hideheaders,
-                        sliceStrokes=args.slice,
-                        colorPaletteFN=args.colorpalettefile,
-                        textScale=textScale,
-                        hideColouredFormatBars=args.hidecolouredformatbars)
-
-
+        v = Visualizer(pyxCanvas=None,
+                       lineLen=textPerLine,
+                       textX=textX, textY=textY,
+                       errX=errx, errY=erry,
+                       hideIDs=args.hideids,
+                       hideComments=args.hidecomments,
+                       hideTSs=args.hidetimestamps,
+                       hideSpeakers=args.hidespeakers,
+                       hidePhrases=args.hidephrases,
+                       hideInfoHeader=args.hideheaders,
+                       sliceStrokes=args.slice,
+                       colorPaletteFN=args.colorpalettefile,
+                       textScale=textScale,
+                       hideColouredFormatBars=args.hidecolouredformatbars,
+                       graphicalDimensions=graphicalDimensions)
         speakerpseudonyms = [pseudonym for id,pseudonym,role in people]
         v.initSpeakers(speakerpseudonyms)
 

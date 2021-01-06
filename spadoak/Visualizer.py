@@ -63,14 +63,17 @@ class Visualizer(object):
         colorPaletteFN="",
         textScale=1.0,
         progressFeedback=True,
-        hideColouredFormatBars=False):
-
+        hideColouredFormatBars=False,
+        graphicalDimensions=None
+        ):
         """ Does the actual drawing, currently in a PyX Canvas.
             xfactor=1,xoffset=0,yfactor=1,yoffset=0     Transformation for PyX
             lineLen=100                                 length of a text line
             textX=0, textY=0, errX=None, errY=None,     Where to put text, and how to offset from there for placing error messages
             hide/slice and stuff                        more or less map directly map onto the command line parameters
             progressFeedback=True                       Give text output while rendering.
+            graphicalDimensions=None                    print markers at the minimal/maximal dimensions
+                                                        based on the given (minX,minY,maxX,maxY).
             """
         self.progressFeedback = progressFeedback
         self.totalColourCount = 0
@@ -156,6 +159,7 @@ class Visualizer(object):
         ###########################
         self.eraseMetaData()
         self.markers=[]
+        self.dims=graphicalDimensions
         self.bgImage = None
 
     def getVisualizerInfo(self):
@@ -165,8 +169,13 @@ class Visualizer(object):
 #       paramInfo += "Text position / Error position::%s,%s / %s,%s\n" % (self.textX,self.textY,self.errX0,self.errY0)
         paramInfo += "Text position / Error position::%s,%s / %s,%s\n" % (self.textX,self.textY,"?","?")
         paramInfo += "lineLen / strokeW / slice::%s / %s / %s\n" % (self.maxW,self.strokewidth,self.sliceStrokes)
-        paramInfo += "hide: IDs/Comments/TSs / Speakers / Phrases / Header::%s/%s/%s / %s / %s / %s\n" % (self.hideIDs,self.hideComments,self.hideTSs, self.hideSpeakers, self.hidePhrases, self.hideInfoHeader)
-
+        paramInfo += ("hide: IDs/Comments/TSs / Speakers / Phrases / Header::%s/%s/%s / %s / %s / %s\n" %
+                      (self.hideIDs,
+                       self.hideComments,
+                       self.hideTSs,
+                       self.hideSpeakers,
+                       self.hidePhrases,
+                       self.hideInfoHeader))
         return paramInfo
 
     def setTrajTransformation(self,xfactor=1,xoffset=0,yfactor=1,yoffset=0):
@@ -301,6 +310,16 @@ class Visualizer(object):
             #print "MARKER F %s %s %s %d" %(x,y,label,self.theSpecialNumber)
             self.symbaker.putText(x+5,y,label)
             self.symbaker.putCross(x,y,8,[pyx.color.rgb.green])
+        if self.dims is not None:
+            minX, minY, maxX, maxY = self.dims
+            self.symbaker.putPolygonC([(minX,minY+20),
+                                       (minX,minY),
+                                       (minX+20,minY)], [pyx.color.rgb.blue])
+            self.symbaker.putPolygonC([(maxX-40,maxY),
+                                       (maxX,maxY),
+                                       (maxX,maxY-40)], [pyx.color.rgb.blue])
+            self.symbaker.putCross(0,0, 10, [pyx.color.rgb.blue])
+
 
     def defineBackgroundImage(self,x,y,w,h,filepath,transparency=0.6):
         print ("    BG-IMAGE: %s,%s,%s,%s,%s" % (x,y,w,h,filepath))
