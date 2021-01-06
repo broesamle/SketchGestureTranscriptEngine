@@ -474,18 +474,6 @@ class Visualizer(object):
                                               microcanvasesByStartTS)
         if self.sliceStrokes:
             self.newCanvas()
-            strokeCount = 0
-            if self.doubleSlice:
-                for iid,startTS,startIdx,stopTS,stopIdx,intervaldata,subseq in aseq:
-                    if intervaldata['IntervalType'] == 'STROKE':
-                        if stopIdx < inpointIdx or startIdx > outpointIdx:
-                            continue        ## in this case, the interval is completely irrelevant
-                        ### check whether it starts earlier
-                        if startIdx < inpointIdx:
-                            continue
-                        strokeCount += 1
-        currStrokeCount = 0
-        oddStrokeCount = True
         ### this loop follows the logic of intevals (coded subsequences)
         ### each inteval is checked whether its a stroke or a phrase
         ### then the corresponding text positions (timestamps, see above) are found and
@@ -596,12 +584,8 @@ class Visualizer(object):
                 polygoneA = polygoneA[1:]
                 self.symbaker.putPolygonC(polygoneA,
                                           strokecolor + [ deco.filled(strokecolor+[pyx.color.transparency(0.9)]) ])
-                currStrokeCount += 1
                 ### every second -- and the last one in any case
-                if self.doubleSlice:
-                    oddStrokeCount = not oddStrokeCount
-                #print "ODD:%s CURR:%s ALL:%s" % (oddStrokeCount,currStrokeCount,strokeCount)
-                if self.sliceStrokes and (oddStrokeCount or currStrokeCount == strokeCount):
+                if self.sliceStrokes:
                     self.drawInfoHeaders()
                     for startTSmicro,microcan in microcanvasesByStartTS.items():
                         self.canvas.insert(microcan)
