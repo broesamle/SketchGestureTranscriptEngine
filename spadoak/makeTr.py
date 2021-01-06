@@ -45,11 +45,11 @@ parser.add_argument('-G','--graphpagelength', type=int, default=None, help='Maxi
 parser.add_argument('-X','--textx', type=int, default=None, help='X position of the text line on the page. (overrides project settings)')
 parser.add_argument('-Y','--texty', type=int, default=None, help='Y position of the text line on the page. (overrides project settings)')
 parser.add_argument('-D','--dims', type=str, default=None, help='add graphical dimension markers. (--dims=minX,minY,maxX,maxY)')
-
 parser.add_argument('-S','--textscale', type=float, default=None, help='scale factor for text size. (overrides project settings)')
 parser.add_argument('-T','--textpagelength', type=int, default=None, help='Maximum chars printed in one text page. (overrides project settings)')
 parser.add_argument('-U','--simulate', action='store_true', help='just simulate, do not generate PDF output')
 parser.add_argument('-c','--slice', action='store_true', help='Generate each stroke on a separate page.')
+parser.add_argument('-t','--textposfixed', action='store_true', help='Keep text position fixed for sliced output.')
 parser.add_argument('-l','--split', action='store_true', help='Split output pages into separate files.')
 parser.add_argument('-d','--hideids', action='store_true', help='hide stroke IDs')
 parser.add_argument('-m','--hidecomments', action='store_true', help='')
@@ -59,6 +59,7 @@ parser.add_argument('-r','--hidephrases', action='store_true', help='')
 parser.add_argument('-z','--hideheaders', action='store_true', help='')
 parser.add_argument('-b','--hidecolouredformatbars', action='store_true', help='')
 parser.add_argument('-H','--hideall', action='store_true', help='hides everything except the Essence!')
+parser.add_argument('-u','--hidesequential', action='store_true', help='hide the intire sequence block (text, bars, links, ...)')
 parser.add_argument('-y','--bboxtext', action='store_true', help='')
 parser.add_argument('-j','--trajectorylabels', action='store_true', help='Print trajectory labels')
 parser.add_argument('-J','--trajectoryprefixes', type=str, nargs='+', default=[], help='Prefixes to be removed from the trajectory labels.')
@@ -307,7 +308,8 @@ for sessID,sessDescr,people in allsessions2:
                        colorPaletteFN=args.colorpalettefile,
                        textScale=textScale,
                        hideColouredFormatBars=args.hidecolouredformatbars,
-                       graphicalDimensions=graphicalDimensions)
+                       graphicalDimensions=graphicalDimensions,
+                       hideSequential=args.hidesequential)
         speakerpseudonyms = [pseudonym for id,pseudonym,role in people]
         v.initSpeakers(speakerpseudonyms)
 

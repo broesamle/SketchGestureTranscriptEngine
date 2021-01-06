@@ -64,7 +64,8 @@ class Visualizer(object):
         textScale=1.0,
         progressFeedback=True,
         hideColouredFormatBars=False,
-        graphicalDimensions=None
+        graphicalDimensions=None,
+        hideSequential=False
         ):
         """ Does the actual drawing, currently in a PyX Canvas.
             xfactor=1,xoffset=0,yfactor=1,yoffset=0     Transformation for PyX
@@ -91,6 +92,7 @@ class Visualizer(object):
         self.hideInfoHeader = hideInfoHeader
         self.sliceStrokes = sliceStrokes
         self.hideColouredFormatBars = hideColouredFormatBars
+        self.hideSeq = hideSequential
         ###########################
         ### graphics parameters
         ###########################
@@ -320,7 +322,6 @@ class Visualizer(object):
                                        (maxX,maxY-40)], [pyx.color.rgb.blue])
             self.symbaker.putCross(0,0, 10, [pyx.color.rgb.blue])
 
-
     def defineBackgroundImage(self,x,y,w,h,filepath,transparency=0.6):
         print ("    BG-IMAGE: %s,%s,%s,%s,%s" % (x,y,w,h,filepath))
         self.bgImage = x,y,w,h,filepath
@@ -382,6 +383,7 @@ class Visualizer(object):
             Slices=[]
             microcanvasesStack = []
             microcanvasesByStartTS = {}
+            textsliceByStartTS = {}
         else:
             Slices=[self.canvas]
 
