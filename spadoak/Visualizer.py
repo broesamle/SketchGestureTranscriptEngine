@@ -361,6 +361,8 @@ class Visualizer(object):
                                    pointKey=keyPremiereTSoffset):
             startTS,startIdx,stopTS,stopIdx,txt = x
             speakerXsep = 0
+            tsSymbolSize = 3.5
+            TSrot = 30
             logging.info( "printing Segment: " + txt )
             logging.info("(%s,%d)-(%s,%d)" % (startTS,startIdx,stopTS,stopIdx))
             if self.progressFeedback:
@@ -447,15 +449,11 @@ class Visualizer(object):
         strokelabelrot = 330
         #### see below ### connwidth = 0.5
         speakerYoff =  self.idYoff - self.phraseHeight - self.speakerwidth
-        #thisSpeakerXsep = 0
         speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
         speakertransparency = 0.0
         trajLabelOffsetX = 5
         trajLabelOffsetY = 5
         trajLabelRot = 45
-        tsRad = 3
-        tsSymbolSize = 3.5
-        TSrot = 30
         #tsOffset
         connwidth = 1
         lastx = -1000
@@ -467,6 +465,7 @@ class Visualizer(object):
             textsliceByStartTS = {}
         else:
             Slices=[self.canvas]
+            microcanvasesByStartTS = None
         segmpos = self._drawTextForSequential(aseq,
                                               inpointIdx,
                                               outpointIdx,
