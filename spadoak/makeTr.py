@@ -37,24 +37,18 @@ parser = argparse.ArgumentParser(description='...')
 parser.add_argument('-s','--sessions', type=str, nargs='+', default=[], help='Sessions to be printed.')
 parser.add_argument('-e','--episodes', type=str, nargs='+', default=[], help='Episodes to be printed.')
 parser.add_argument('-p','--pages', type=str, nargs='+', default=[], help='Pages to be printed. (relative to respective episode)')
-
 parser.add_argument('-B','--begin', type=int, default=None, help='Index where the printing starts. (relative to respective episode)')
 parser.add_argument('-E','--end', type=int, default=None, help='Index where the printing stops. (relative to respective episode)')
 parser.add_argument('-P','--project', type=str, default="ProjectDescriptor.xml", help='The file containging this project`s descriptor.')
-#parser.add_argument('-I','--inpoint', type=str, default='', help='Index where the printing starts')
-#parser.add_argument('-O','--outpoint', type=str, default='', help='Index where the printing stops')
-
 parser.add_argument('-L','--textperline', type=int, default=None, help='Maximum number of sequence chars printed in one line. (overrides project settings)')
 parser.add_argument('-G','--graphpagelength', type=int, default=None, help='Maximum chars printed in one graphics page. (overrides project settings)')
 parser.add_argument('-X','--textx', type=int, default=None, help='X position of the text line on the page. (overrides project settings)')
 parser.add_argument('-Y','--texty', type=int, default=None, help='Y position of the text line on the page. (overrides project settings)')
 parser.add_argument('-S','--textscale', type=float, default=None, help='scale factor for text size. (overrides project settings)')
 parser.add_argument('-T','--textpagelength', type=int, default=None, help='Maximum chars printed in one text page. (overrides project settings)')
-
 parser.add_argument('-U','--simulate', action='store_true', help='just simulate, do not generate PDF output')
 parser.add_argument('-c','--slice', action='store_true', help='Generate each stroke on a separate page.')
 parser.add_argument('-l','--split', action='store_true', help='Split output pages into separate files.')
-
 parser.add_argument('-d','--hideids', action='store_true', help='hide stroke IDs')
 parser.add_argument('-m','--hidecomments', action='store_true', help='')
 parser.add_argument('-a','--hidetimestamps', action='store_true', help='hide timestamps')
@@ -158,20 +152,14 @@ for sessID,sessDescr,people in allsessions2:
     print ( "SESS:%s(%s)  PEOPLE:%s" % (sessID, sessDescr, people) )
 
     for episode in descrdoc.getEpisodesBySession(sessID):
-
         if episodesArg != [] and episode['id'] not in episodesArg:
             print("...skipping episode %s" % episode['id'])
             continue
-
         try:
             episodeDescr = episode['descr']
         except KeyError:
             episodeDescr = "--no Episode Descrition--"
-
-
         episodeID = episode['id']
-
-
 
         ### timelines are amalgamated with transcript sequences in descriptor version 1.1
         ### if multiple text/video streams will be needed in the future, timelines may be a helpul organizational unit.
@@ -179,10 +167,7 @@ for sessID,sessDescr,people in allsessions2:
         ### in 1.0 the following two info items where in the timeline definition
         trnscrseqID = episode['transcriptsequence']
         trnscrblockID = episode['transcriptblock']
-
         print("EPISODE:%s  BLOCK:%s  SEQ:%s" % (episodeID, trnscrblockID, trnscrseqID))
-
-
 
         ##############################
         ### Get Transcript Block
@@ -194,37 +179,26 @@ for sessID,sessDescr,people in allsessions2:
             oldTrnscrBlockID = newTrnscrBlockID
             trnscrblockFn = descrdoc.getResource(newTrnscrBlockID)['file']
             #logging.info( "loading new transcript block newTrnscrBlockID from file %s" % (newTrnscrBlockID,trnscrblockFn) )
-
             print ("TRNSCR:%s TRNSCR-XML:%s" % (newTrnscrBlockID,trnscrblockFn))
             logging.info("TRNSCR %s from:%s" % (newTrnscrBlockID,trnscrblockFn))
-
             trnscrblock = XMLCorpusDocument()
             trnscrblock.readXMLfile(trnscrblockFn)
-
             #listOfAseqs = trnscrblock.getTranscriptSequences()
-
-
 
         ################################################
         ### Get Data from Episode
         ################################################
 
-        ######
         ### prefixes
-        ######
-
         if 'transcript_id_prefix' in episode:
             transcrIdPrefix = episode['transcript_id_prefix']
         else:
             transcrIdPrefix = ""
-
         if 'spatial_id_prefix' in episode:
             spatialIdPrefix = episode['spatial_id_prefix']
         else:
             spatialIdPrefix = ""
-
         print("PREFIX spatial/transcript: %s / %s" % (spatialIdPrefix, transcrIdPrefix))
-
 
         ######
         ### transcript subsequence (based on episode or in/outpoint)
@@ -239,14 +213,10 @@ for sessID,sessDescr,people in allsessions2:
             basedOn = "(IN/OUT)"
 
         logging.info ("Getting annotated sequence from current transcript block: %s, %s..%s" % (trnscrseqID,inpoint,outpoint))
-
         print("Getting annotated sequence from current transcript block: %s, %s..%s" % (trnscrseqID, inpoint, outpoint))
-
         logging.info( "Episode %s: %s..%s INT:%s " % (episode['id'],inpoint,outpoint,intervalID) )
         print("EPISODE:%s  %s..%s  %s" % (episode['id'], inpoint, outpoint, basedOn))
-
         aseq = trnscrblock.getTranscriptSequnce(trnscrseqID,inpoint,outpoint,intervalID)
-
 
         ######
         ### trajectories and canvas
@@ -258,7 +228,6 @@ for sessID,sessDescr,people in allsessions2:
             spatialDataType = 'CANVAS'
             canvasD = descrdoc.getCanvasAsDict(episode['canvas'])
             ctrajectorydata = descrdoc.getElementsFromCanvasAsDict(episode['canvas'],'TrajectoryData')
-
             if 'resourcesubset' in episode:
                 ressubset = set(episode['resourcesubset'].split(','))
                 for traj in ctrajectorydata:
@@ -271,7 +240,6 @@ for sessID,sessDescr,people in allsessions2:
                     resIDs.append(resID)
             spatialDataD = canvasD
             print("CANVAS:%s  RESOURCES:%s " % (episode['canvas'], resIDs))
-
         elif 'image-from-collection' in episode:
             spatialDataType = 'IMAGE_FROM_COLLECTION'
             imagecollectionResID, imagecollectionSelectedFile = episode['image-from-collection'].split(':')
@@ -287,19 +255,14 @@ for sessID,sessDescr,people in allsessions2:
         ### Get Text/Graphics Parameters from spatialDataD
         ################################################
         # # #   Bei gelegenheit anpassen -- nicht heute, grad laeufts --
-
         textPerLine = fetchIfNotDef(textPerLineArg,spatialDataD,'textperline',textPerLineDefault,int)
         textPageLen = fetchIfNotDef(textPageLenArg,spatialDataD,'textpagelen',textPerLine*9,int)
         graphPageLen = fetchIfNotDef(graphPageLenArg,spatialDataD,'graphpagelen',textPerLine,int)
-
         textScale = fetchIfNotDef(textScaleArg,spatialDataD,'textscale',1.0,float)
-
         textX = fetchIfNotDef(textXarg,spatialDataD,'textx',0,int)
         textY = fetchIfNotDef(textYarg,spatialDataD,'texty',0,int)
-
         errx = fetchOrDefault(spatialDataD,'errx',None,int)
         erry = fetchOrDefault(spatialDataD,'erry',None,int)
-
         if 'paperFormat' in spatialDataD:
             paperformat = spatialDataD['paperFormat']
             #landscape = fetchOrDefault(spatialDataD,'landscape',0,int)
@@ -311,7 +274,6 @@ for sessID,sessDescr,people in allsessions2:
 
         landscape = fetchOrDefault(spatialDataD,'landscape',0,int)
         portrait = fetchOrDefault(spatialDataD,'portrait',0,int)
-
         if (landscape == 0 and portrait == 0):          # no setting was chosen by the user
             rotatePaper = 1     # use the historic default from the early days, where PyX output was on A4 landscape
         elif landscape == 1 and portrait == 0:
@@ -341,7 +303,6 @@ for sessID,sessDescr,people in allsessions2:
 
 
         speakerpseudonyms = [pseudonym for id,pseudonym,role in people]
-
         v.initSpeakers(speakerpseudonyms)
 
         ################################################

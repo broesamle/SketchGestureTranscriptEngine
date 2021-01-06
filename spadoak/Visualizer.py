@@ -36,24 +36,6 @@ pyx.unit.set(uscale=coordinateBaseScale)
 def cleanTexInput(s):
     return s.replace("^"," ")
 
-#def texIfy(s):
-#   print
-#   r = s.replace("#Par;","\quad")
-#   r = r.replace("_","?")
-#   r = r.replace("^"," ")
-#   r = r.replace("\\rquote","'")
-#   r = r.replace("\endash","--")
-#   r = r.replace("*","$\\ast$")
-#   r = r.replace("\\tab","\quad")
-#   r = r.replace("#","+")
-
-#   rr = r[-10:]
-#   r = r[:-10]
-#   rr = rr.replace("#","-")
-#   rr = rr.replace("\\","-")
-#   return r+rr
-
-
 #############################################
 ### VISUALIZER
 #############################################
@@ -90,20 +72,14 @@ class Visualizer(object):
             hide/slice and stuff                        more or less map directly map onto the command line parameters
             progressFeedback=True                       Give text output while rendering.
             """
-
         self.progressFeedback = progressFeedback
         self.totalColourCount = 0
-
         pyx.unit.set(xscale=textBaseScale*textScale)
-
         ### for double slicing
         self.doubleSlice = False
         self.lastPrintedStrokeID = ""
-
-
         ### for debugging purposes
         self.theSpecialNumber = 11111
-
         self.hideIDs = hideIDs
         self.hideComments = hideComments
         self.hideTSs = hideTSs
@@ -112,26 +88,21 @@ class Visualizer(object):
         self.hideInfoHeader = hideInfoHeader
         self.sliceStrokes = sliceStrokes
         self.hideColouredFormatBars = hideColouredFormatBars
-
         ###########################
         ### graphics parameters
         ###########################
         self.maxW = lineLen
         self.pageHeight = pyx.unit.x_mm*230
         self.textX,self.textY  =  textX,textY
-
         if errX:    self.errX0=textX+errX
         else:       self.errX0=textX+self.pageHeight*0.7
         if errY:    self.errY0=textY+errY
         else:       self.errY0=textY+self.pageHeight*0.90
-        #           print "    Visualizer params: LLEN:%s TXTXY:%s,%s" % (self.maxW,self.textX,self.textY)
-
         self.strokewidth = strokewidth
         self.handstrokewidth=self.strokewidth*2
         self.txtstrokewidthscale = 2.0
         self.draww = self.strokewidth*1.7
         self.strokecolors = PyxPalette()
-
         if self.sliceStrokes:
             self.stroketransp = 0.0
             if colorPaletteFN!="":
@@ -145,71 +116,49 @@ class Visualizer(object):
                 self.strokecolors.extractFromHTMFile(os.path.join(pathToMyself,colorPaletteFN))
             else:
                 self.strokecolors.extractFromHTMFile(os.path.join(pathToMyself,"alternating-stroke-colorsC.htm"))
-
-
-
         self.connprecis = 20
-
         self.setTrajTransformation(xfactor,xoffset,yfactor,yoffset)
-
         self.symbolsize = 15.0
         self.symbolstrokewidth = self.symbolsize / 10
         self.symbolfilltrans = 0.5
         self.symbaker = SymbolMaker(pyxCanvas,size=self.symbolsize,linewidth=self.symbolstrokewidth)
         self.newCanvas(pyxCanvas)
-
         self.speakercolors = PyxPalette()
         self.speakercolors.extractFromHTMFile(os.path.join(pathToMyself,"palettespeakers.htm"))
         self.speakers = {}
         #self.speakers['informer'] = self.speakercolors.getColor(len(self.speakers))
-
         self.erroffset = 0, -pyx.unit.x_pt * 10
-
         self.idtxtSep = pyx.unit.x_pt * 4
         self.idYoff = - self.idtxtSep
-
         if not hideIDs:
             self.idHeight = pyx.unit.x_pt * 16
         else:
             self.idHeight = pyx.unit.x_pt * 0
-
         self.commentYoff = - (self.idtxtSep+self.idHeight+pyx.unit.x_pt * 4)
-
         if not hideComments:
             self.commentHeight = pyx.unit.x_pt * 8
         else:
             self.commentHeight = pyx.unit.x_pt * 0
-
         if not hideTSs:
             self.tsHeight = pyx.unit.x_pt * 16
         else:
             self.tsHeight = pyx.unit.x_pt * 0
-
         self.tsYoff = self.idYoff - (self.tsHeight + self.idHeight + self.commentHeight)
-
         self.phraseHeight = self.commentHeight + self.idHeight + self.tsHeight
         self.phraseYoff = self.idYoff - 0.5 * self.phraseHeight
-
         self.speakerwidth = pyx.unit.x_pt * 2
-
         self.textFontSize = 10*pyx.unit.x_pt
         self.textSep = 10*pyx.unit.x_pt
         self.textHeight = (self.phraseHeight + self.strokewidth*self.txtstrokewidthscale
                     + self.textFontSize + self.speakerwidth + self.idtxtSep + self.textSep)
-
-        #print "XXXXXXXX %s" % self.textHeight
-        #print ("CorrectionFactor: %f %f" % (self.yfactor, self.yoffset))
-
         ###########################
         ### Info parameters and supplementary graphics
         ###########################
-
         self.eraseMetaData()
         self.markers=[]
         self.bgImage = None
 
     def getVisualizerInfo(self):
-
         paramInfo = ""
         paramInfo += "Visualiser Settings::*************\n"
         paramInfo += "Transformation Xoff,Yoff,Xscale,Yscale:: %s , %s , %s , %s\n" % (self.xfactor,self.xoffset,self.yfactor,self.yoffset)
@@ -227,7 +176,6 @@ class Visualizer(object):
         self.yfactor = yfactor
         self.yoffset = yoffset
         self.tra = pyx.trafo.scale(xfactor,yfactor) * pyx.trafo.translate(xoffset,-yoffset)
-
 
     def newCanvas(self, pyxCanvas=None):
         if not pyxCanvas :
@@ -262,12 +210,10 @@ class Visualizer(object):
         for s in speakers:
             self.speakers[s] = self.speakercolors.getColor(len(self.speakers))
 
-
     def errorPos(self):
         e = self.errpos
         self.errpos = (self.errpos[0] + self.erroffset[0]),(self.errpos[1] + self.erroffset[1])
         return e
-
 
     ### DRAWING ###
     ### DRAWING ###
@@ -296,24 +242,15 @@ class Visualizer(object):
         #self.symbaker.putCross(0.0,0.0,3.0,[pyx.color.rgb.blue])
         if self.hideInfoHeader:
             return
-
         x,y,width,height,dist = self.getInfoPositions()
-
         tab = 20*pyx.unit.x_mm
         margin = dist*0.5
-
         sc = pyx.canvas.canvas()
-
         transf = [pyx.trafo.rotate(90,x=x,y=y), pyx.trafo.translate(-height+2*margin, self.metaInfoPos)]
-
         sc.stroke(pyx.path.rect(x,y-0.5*dist,width,height),[deco.filled([pyx.color.grey(0.90)])])
-
         string1 = "PROJ:%s --- SESS:%s --- EPIS:%s" % ( self.projectInfo, self.sessionInfo, self.episodeInfo )
         string2 = "%s" % self.pageInfo
         string3 = "SPAT:%s --- SEQU:%s" % (self.spatialInfo,self.sequentialInfo)
-#       self.canvas.text(x+margin,y+dist,string1,transf)
-#       self.canvas.text(x+width-2*margin,y+dist,string2,[text.halign.boxright]+transf)
-#       self.canvas.text(x+margin,y,string3,transf)
         logging.info("A-LATEX:%s" % cleanTexInput(string1))
         sc.text(x+margin,y+dist,cleanTexInput(string1))
         logging.info("B-LATEX:%s" % cleanTexInput(string2))
@@ -322,19 +259,16 @@ class Visualizer(object):
         sc.text(x+margin,y,cleanTexInput(string3))
         self.canvas.insert(sc, transf)
 
-
     def setMarkers(self,svgdoc,
         markers=['Marker1','Marker2','Marker3','Marker4','TEXT_MARKER','UPPER_LEFT','LOWER_RIGHT'],
         markerlabels=[ '1',      '2',      '3',      '4',      '',        'UL',         'LR']):
         missingmarkers = []
-
         for marker,label in zip(markers,markerlabels):
             try:
                 x,y = svgdoc.getSodiPodiXY(marker)
                 self.markers.append((label,x,y,marker))
             except(ValueRetrieveError):
                 missingmarkers.append(marker)
-
         if missingmarkers != []:
             print ("!!  Did not find marker(s) %s." % str(missingmarkers)[1:-1])
 
@@ -346,16 +280,13 @@ class Visualizer(object):
                 return
         raise InputError("Marker not defined! %s" % marker)
 
-
     def getBBoxFromMarkers (self,marker1,marker2):
         for label,x,y,m in self.markers:
             if m == marker1:
                 x1,y1 = self.tra.apply(x,y)
             if m == marker2:
                 x2,y2 = self.tra.apply(x,y)
-
         return pyx.bbox.bbox(llx_pt=min(x1,x2),lly_pt=min(y1,y2),urx_pt=max(x1,x2),ury_pt=max(y1,y2))
-
 
     def drawMarkers(self):
         #self.theSpecialNumber += 1
@@ -455,18 +386,15 @@ class Visualizer(object):
         #thisSpeakerXsep = 0
         speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
         speakertransparency = 0.0
-
         trajLabelOffsetX = 5
         trajLabelOffsetY = 5
         trajLabelRot = 45
-
         tsRad = 3
         tsSymbolSize = 3.5
         TSrot = 30
         #tsOffset
         origflipper = 5
         connwidth = 1
-
         lastx = -1000
         lastnative = False
 
@@ -508,7 +436,6 @@ class Visualizer(object):
                     flipper = origflipper
                 logging.debug("POSX,LASTX,FLIPPER %s %s %s (%s)" % (posx,lastx,flipper,startTS))
                 lastx = posx
-
                 ### printing the timestamp (ignoring the hours part by [3:])
                 if isNativePremiereTS(startTS):
                     #print "posy, tsYOff: %s %s" % (posy,self.tsYoff)
@@ -529,7 +456,6 @@ class Visualizer(object):
         segmpos[stopTS] = center2
 
         #posy += 3
-
         #self.symbaker.putCross(posx,posy+self.tsYoff,tsSize,[pyx.color.rgb.blue])
         #if posx - lastx < 2:
         #   flipper =  - flipper
@@ -552,29 +478,23 @@ class Visualizer(object):
                         if startIdx < inpointIdx:
                             continue
                         strokeCount += 1
-
         currStrokeCount = 0
         oddStrokeCount = True
 
         #if self.progressFeedback:  sys.stdout.write("\n")
         for iid,startTS,startIdx,stopTS,stopIdx,intervaldata,subseq in aseq:
-
             if 'spatialElementID' in intervaldata:
                 spatElID = intervaldata['spatialElementID']
             else:
                 spatElID = iid
-
-
             if stopIdx < inpointIdx or startIdx > outpointIdx:
                 continue        ## in this case, the interval is completely irrelevant
-
             ### check whether it starts earlier
             if startIdx < inpointIdx:
                 startTS = TS_INPOINT
                 startclipping = True
             else:
                 startclipping = False
-
             ### check whether it stops later
             if stopIdx > outpointIdx:
                 stopTS = TS_OUTPOINT
@@ -601,8 +521,6 @@ class Visualizer(object):
 
                 if self.lastPrintedStrokeID == spatElID:
                     continue
-
-
                 spatElID = spatialIDprefix + spatElID
 
                 ### rotate color palette / count total required colours
@@ -1273,66 +1191,47 @@ class SymbolMaker(object):
         self.setSizeOnce(self.size*0.7)
         self.putSymbol('bigO',x,y,decoration=decoration+[style.linewidth(4),style.dash([1.5,1.5])])
         self.resetSize()
+
     def put_o(self,x,y,decoration):
         rad=self.size/2
         self.canvas.stroke(pyx.path.circle(x, y, self.rad/2), decoration)
+
     def put_B(self,x,y,decoration):
         self.canvas.stroke(pyx.path.circle(x, y, rad/2), decoration)
+
     def put_square(self,x,y,decoration):
         self.canvas.stroke(pyx.path.rect(x-self.rad, y-self.rad, self.size,self.size), decoration)
+
     def put_triangle(self,x,y,decoration):
         x1,y1 = x-self.cos30*self.rad,y-self.rad/2
         x2,y2 = x+self.cos30*self.rad,y-self.rad/2
         x3,y3 = x,y+self.rad
         self.putPolygonC([(x1,y1),(x2,y2),(x3,y3)],decoration)
+
     def put_diamond(self,x,y,decoration):
         self.putPolygonC([(x-self.rad,y),(x,y-self.rad),(x+self.rad,y),(x,y+self.rad)],decoration)
+
     def put_n(self,x,y,decoration):
         p = pyx.path.path()
-        #p.append(pyx.path.moveto(x-self.rad, y))
-        #p.append(pyx.path.lineto(x+self.rad,y))
         p.append(pyx.path.arcn(x,y, self.rad, 0, 180))
         self.canvas.stroke(p,decoration)
 
-#   def put_penOR(self,x,y,decoration):
-#       sc = canvas.canvas()
-#
-#       self.canvas.insert(sc, [pyx.trafo.translate(0,-self.rad),pyx.trafo.rotate(340,x,y)])
-#
-#       #sc.stroke(pyx.path.arcn(x,y, self.rad/2, 345, 15),decoration+[deco.filled()])
-#       #sc.stroke(pyx.path.line(x+self.sin20*self.rad/2,y-self.cos20*self.rad/2,x+self.rad,y-self.cos20*self.rad),decoration)
-#       #sc.stroke(pyx.path.line(x-self.sin20*self.rad/2,y-self.cos20*self.rad/2,x+self.rad,y-self.cos20*self.rad),decoration)
-
-#   def put_penOL(self,x,y,decoration):
-#       sc = canvas.canvas()
-#       self.canvas.insert(sc, [pyx.trafo.translate(0,-self.rad),pyx.trafo.rotate(20,x,y)])
-
     def put_penR(self,x,y,decoration):
         sc = pyx.canvas.canvas()
-
         w = self.sin20*self.rad
         h = self.cos20*self.rad
         sc.stroke(pyx.path.rect(x-w/2, y, w, h),decoration+[deco.filled()])
-
         sc.stroke(pyx.path.line(x-w/2, y+h, x-w/2,y+self.size),decoration)
         sc.stroke(pyx.path.line(x+w/2, y+h, x+w/2,y+self.size),decoration)
         self.canvas.insert(sc, [pyx.trafo.translate(0,self.rad/3),pyx.trafo.rotate(310,x,y)])
 
     def put_penL(self,x,y,decoration):
-
         sc = pyx.canvas.canvas()
-
         w = self.sin20*self.rad
         h = self.cos20*self.rad
         sc.stroke(pyx.path.rect(x-w/2, y, w, h),decoration+[deco.filled()])
-
         sc.stroke(pyx.path.line(x-w/2, y+h, x-w/2,y+self.size),decoration)
         sc.stroke(pyx.path.line(x+w/2, y+h, x+w/2,y+self.size),decoration)
-
-#       sc = canvas.canvas()
-#       sc.stroke(pyx.path.rect(x-self.sin20*self.rad/2,y+self.rad/6,self.sin20*self.rad,self.cos20*self.rad-self.rad/6),decoration+[deco.filled()])
-#       sc.stroke(pyx.path.line(x-self.sin20*self.rad/2,y+self.cos20*self.rad, x-self.sin20*self.rad/2,y+self.size),decoration)
-#       sc.stroke(pyx.path.line(x+self.sin20*self.rad/2,y+self.cos20*self.rad, x+self.sin20*self.rad/2,y+self.size),decoration)
         self.canvas.insert(sc, [pyx.trafo.translate(0,self.rad),pyx.trafo.rotate(50,x,y)])
 
     def put_omega(self,x,y,decoration):
@@ -1411,8 +1310,6 @@ class SymbolMaker(object):
         p.append(pyx.path.lineto(x-self.rad,y-self.rad))
         self.canvas.stroke(p,decoration)
 
-
-
     def put_edgeOfHandR(self,x,y,decoration):
         size = self.size
         xoff = size/2
@@ -1431,7 +1328,6 @@ class SymbolMaker(object):
         p.append(pyx.path.arcn(x+xoff+size/16,y, self.size/16, 0, 180))
         self.canvas.stroke(p, decoration)
 
-
     def put_graspingHandR(self,x,y,decoration):
         p = pyx.path.path()
         p.append(pyx.path.arcn(x,y,self.rad, 250, 290))
@@ -1444,17 +1340,11 @@ class SymbolMaker(object):
         self.canvas.stroke(p,decoration)
         self.canvas.stroke(pyx.path.line(x,y+self.rad,x-self.size,y+self.rad),decoration)
 
-#   def put_unknownSymbol(self,x,y,decoration):
-#       self.canvas.text(x,y,'?',[pyx.color.rgb(0.8,0,0.8)])
-#       self.canvas.stroke(pyx.path.circle(x, y, self.size/2),decoration)
-
-#   def put_(self,x,y,decoration):
     def putSymbol(self,symbol,x,y,decoration):
         if symbol not in self.sfLookup:
             self.canvas.text(x,y,symbol,[pyx.color.rgb(0.8,0,0.8)])
         else:
             self.sfLookup[symbol](x,y,decoration)
-
 
     def putCross(self,x,y,size,decorate=[]):
         if not size:
@@ -1481,8 +1371,6 @@ class SymbolMaker(object):
         for x,y in edges[1:]:
             polypath.append(pyx.path.lineto(x,y))
         polypath.append(pyx.path.closepath())
-        #polypath.append(path.multilineto_pt(polygonEdges[0]))
-        #polypath.append(path.closepath())
         self.canvas.stroke(polypath,decoration)
 
 
