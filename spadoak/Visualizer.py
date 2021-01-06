@@ -338,6 +338,67 @@ class Visualizer(object):
         self.drawMarkers()
         return self.canvas
 
+    def _drawTextForSequential(self,
+                               aseq,
+                               inpointIdx,
+                               outpointIdx,
+                               posx,
+                               posy,
+                               microcanvasesByStartTS):
+        """Draw sequential text data on the current canvas.
+        If `self.sliceStrokes` is true, new canvases can be
+        created and be added to microcanvasesByStartTS
+        Returns the positions of the markers of all segments as a dict.
+        """
+        segmpos = {}
+        ### this loop follows the logic of SEGMENTS between TIMESTAMPs.
+        ### it prints text and puts markers where there is timestamps (irrelevant where they belong in terms of intervals!)
+        ### the iteration follows segments (where a segment is defined as the largest piece of transcript text belonging to the same set of intervals)
+        ### as soon as a new one starts or an interval stops a segment border (and a timestamp) should be reached.
+        for x in aseq.iterSegments(inpointIdx,
+                                   outpointIdx,
+                                   sortPoints=BY_TIMESTAMP,
+                                   pointKey=keyPremiereTSoffset):
+            startTS,startIdx,stopTS,stopIdx,txt = x
+            speakerXsep = 0
+            logging.info( "printing Segment: " + txt )
+            logging.info("(%s,%d)-(%s,%d)" % (startTS,startIdx,stopTS,stopIdx))
+            if self.progressFeedback:
+                sys.stdout.write("|" + txt)
+            ### put the text segment
+            startmarker = "\\PyXMarker{anfang}"
+            stopmarker = "\\PyXMarker{ende}"
+            TEXtxt =  startmarker + codecs.encode(txt,'latex').decode('utf8') + stopmarker
+            TEXtxt = cleanTexInput(TEXtxt)
+            t = self.canvas.text(posx+speakerXsep,posy,TEXtxt)
+
+            ### after printing the text of the segment we save the
+            ### position of marker 1 for later interval drawing
+            ### interval drawing will refer to the timestamps and retrieve the respective coordinates
+            center1 = t.marker("anfang")
+            posx,posy = center1
+            segmpos[startTS] = center1
+            if not self.sliceStrokes and not self.hideTSs:
+                lastx = posx
+                ### printing the timestamp (ignoring the hours part by [3:])
+                if isNativePremiereTS(startTS):
+                    self.symbaker.putCross(posx, posy+self.tsYoff,
+                                           tsSymbolSize,[pyx.color.rgb.red])
+                    self.canvas.stroke(pyx.path.line(
+                            posx,posy+self.tsYoff,posx,posy-5),
+                            [pyx.color.rgb.red])
+                    self.canvas.text(posx, posy+self.tsYoff, "%s" % startTS[3:],
+                            [pyx.text.size.tiny,
+                             pyx.trafo.rotate(TSrot)])
+            center2 = t.marker("ende")
+            posx,posy = center2[:2]
+            if self.sliceStrokes:
+                microcanvasesByStartTS[startTS] = self.canvas
+                self.newCanvas(pyx.canvas.canvas())
+        ### save the last segments end position -- then we should have all timestamps
+        segmpos[stopTS] = center2
+        return segmpos
+
     def drawIntervalsBetween(self,
                              aseq,
                              inpointIdx, outpointIdx,
@@ -366,7 +427,6 @@ class Visualizer(object):
                 pos += self.maxW
                 offset -= self.textHeight
                 self.metaInfoPos = offset
-
             if self.sliceStrokes:
                 return result
             else:
@@ -377,27 +437,16 @@ class Visualizer(object):
         ######################################
         ### the rest is basically the main job
         ######################################
-        if self.sliceStrokes:
-            Slices=[]
-            microcanvasesStack = []
-            microcanvasesByStartTS = {}
-            textsliceByStartTS = {}
-        else:
-            Slices=[self.canvas]
+
         ### textX is the user position of the text
         ### textPos is the yposition moving down line by line (not given. when recursing for multiple lines)
         if not textPos:
             textPos = self.textY
         posx,posy = self.textX,textPos
-        ## segmpos keeps the positions of the markers of all segments
-        # ... independent of the interval structure behind it
-        segmpos = {}
         strokeoffset = self.textFontSize + (self.strokewidth*self.txtstrokewidthscale*0.5)
         strokelabelrot = 330
         #### see below ### connwidth = 0.5
         speakerYoff =  self.idYoff - self.phraseHeight - self.speakerwidth
-        #speakerXsep = pyx.unit.x_pt *2
-        speakerXsep = 0
         #thisSpeakerXsep = 0
         speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
         speakertransparency = 0.0
@@ -408,72 +457,22 @@ class Visualizer(object):
         tsSymbolSize = 3.5
         TSrot = 30
         #tsOffset
-        origflipper = 5
         connwidth = 1
         lastx = -1000
-        lastnative = False
-
-        ### this loop follows the logic of SEGMENTS between TIMESTAMPs.
-        ### it prints text and puts markers where there is timestamps (irrelevant where they belong in terms of intervals!)
-        ### the iteration follows segments (where a segment is defined as the largest piece of transcript text belonging to the same set of intervals)
-        ### as soon as a new one starts or an interval stops a segment border (and a timestamp) should be reached.
-        for x in aseq.iterSegments(inpointIdx,outpointIdx,sortPoints=BY_TIMESTAMP,pointKey=keyPremiereTSoffset):
-            if self.progressFeedback:   sys.stdout.write("+")
-            startTS,startIdx,stopTS,stopIdx,txt = x
-            if self.sliceStrokes:
-                #print ("MICROCANVAS: [%s] %s" % (startTS , self.canvas))
-                microcanvasesStack.append(self.canvas)
-                microcanvasesByStartTS[startTS] = self.canvas
-            logging.info( "printing Segment: " + txt )
-            logging.info("(%s,%d)-(%s,%d)" % (startTS,startIdx,stopTS,stopIdx))
-            if self.progressFeedback:   sys.stdout.write(txt)
-            #marker = markerIfy(stopTS)
-            ### put the text segment
-            startmarker = "\\PyXMarker{anfang}"
-            stopmarker = "\\PyXMarker{ende}"
-            TEXtxt =  startmarker + codecs.encode(txt,'latex').decode('utf8') + stopmarker
-            TEXtxt = cleanTexInput(TEXtxt)
-            t = self.canvas.text(posx+speakerXsep,posy,TEXtxt)
-
-            ### after printing the text of the segment we save the
-            ### position of marker 1 for later interval drawing
-            ### interval drawing will refer to the timestamps and retrieve the respective coordinates
-            center1 = t.marker("anfang")
-            posx,posy = center1
-            segmpos[startTS] = center1
-            if not self.sliceStrokes and not self.hideTSs:
-                if posx - lastx < 10 and lastnative:
-                    flipper =  - flipper
-                else:
-                    flipper = origflipper
-                logging.debug("POSX,LASTX,FLIPPER %s %s %s (%s)" % (posx,lastx,flipper,startTS))
-                lastx = posx
-                ### printing the timestamp (ignoring the hours part by [3:])
-                if isNativePremiereTS(startTS):
-                    #print "posy, tsYOff: %s %s" % (posy,self.tsYoff)
-                    self.symbaker.putCross(posx,posy+self.tsYoff,tsSymbolSize,[pyx.color.rgb.red])
-                    self.canvas.stroke(pyx.path.line(posx,posy+self.tsYoff,posx,posy-5),[pyx.color.rgb.red])
-                    lastnative = True
-                    self.canvas.text(posx,posy+self.tsYoff,"%s" % startTS[3:],[pyx.text.size.tiny,pyx.trafo.rotate(TSrot)])
-                else:
-                    lastnative = False
-            center2 = t.marker("ende")
-            posx,posy = center2[:2]
-            if self.sliceStrokes:
-                self.newCanvas(pyx.canvas.canvas())
-        ### save the last segments end position -- then we should have all timestamps
-        segmpos[stopTS] = center2
-        #posy += 3
-        #self.symbaker.putCross(posx,posy+self.tsYoff,tsSize,[pyx.color.rgb.blue])
-        #if posx - lastx < 2:
-        #   flipper =  - flipper
-        #self.canvas.text(posx,posy+self.tsYoff+tsSize+flipper,"%s" % startTS,[pyx.text.size.tiny,pyx.color.rgb.blue,pyx.trafo.rotate(TSrot)])
-        #posy -= 3
-
-        ### this loop follows the logic of intevals (coded subsequences)
-        ### each inteval is checked whether its a stroke or a phrase
-        ### then the corresponding text positions (timestamps, see above) are found and
-        ### the interval is marked on the text.
+        ## segmpos: the positions of the markers of all segments
+        # ... independent of the interval structure behind it
+        if self.sliceStrokes:
+            Slices=[]
+            microcanvasesByStartTS = {}
+            textsliceByStartTS = {}
+        else:
+            Slices=[self.canvas]
+        segmpos = self._drawTextForSequential(aseq,
+                                              inpointIdx,
+                                              outpointIdx,
+                                              posx,
+                                              posy,
+                                              microcanvasesByStartTS)
         if self.sliceStrokes:
             self.newCanvas()
             strokeCount = 0
@@ -488,7 +487,10 @@ class Visualizer(object):
                         strokeCount += 1
         currStrokeCount = 0
         oddStrokeCount = True
-        #if self.progressFeedback:  sys.stdout.write("\n")
+        ### this loop follows the logic of intevals (coded subsequences)
+        ### each inteval is checked whether its a stroke or a phrase
+        ### then the corresponding text positions (timestamps, see above) are found and
+        ### the interval is marked on the text.
         for iid,startTS,startIdx,stopTS,stopIdx,intervaldata,subseq in aseq:
             if 'spatialElementID' in intervaldata:
                 spatElID = intervaldata['spatialElementID']
