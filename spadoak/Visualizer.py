@@ -346,14 +346,21 @@ class Visualizer(object):
         self.drawMarkers()
         return self.canvas
 
-    def drawIntervalsBetween(self,aseq,inpointIdx,outpointIdx,svgdocs,textPos=None,transcriptIDprefix="",spatialIDprefix="",drawTrajLabels=False, trajLabelPrefixes=[]):
+    def drawIntervalsBetween(self,
+                             aseq,
+                             inpointIdx, outpointIdx,
+                             svgdocs,
+                             textPos=None,
+                             transcriptIDprefix="",
+                             spatialIDprefix="",
+                             drawTrajLabels=False,
+                             trajLabelPrefixes=[]):
         ### the transcriptIDprefix defines the prefix of the stroke IDs coming from the transcript.
         ### it has to be removed for mapping onto the svgdoc ids, which do not have the transcript sequence prefix
         ### TODO: a systematic path/namespace logic would neatly solve the issue without this 'hack'
 
         logging.debug("drawIntervalsBetween: %s..%s" % (inpointIdx,outpointIdx))
-        #maxW = 1300
-        #print aseq.seq[inpointIdx:outpointIdx]
+
         ### split recursively if the sequence is too long
         #################################################
 
@@ -378,7 +385,6 @@ class Visualizer(object):
         ######################################
         ### the rest is basically the main job
         ######################################
-
         if self.sliceStrokes:
             Slices=[]
             microcanvasesStack = []
@@ -386,18 +392,14 @@ class Visualizer(object):
             textsliceByStartTS = {}
         else:
             Slices=[self.canvas]
-
         ### textX is the user position of the text
         ### textPos is the yposition moving down line by line (not given. when recursing for multiple lines)
         if not textPos:
             textPos = self.textY
-
         posx,posy = self.textX,textPos
-
         ## segmpos keeps the positions of the markers of all segments
         # ... independent of the interval structure behind it
         segmpos = {}
-
         strokeoffset = self.textFontSize + (self.strokewidth*self.txtstrokewidthscale*0.5)
         strokelabelrot = 330
         #### see below ### connwidth = 0.5
@@ -430,8 +432,6 @@ class Visualizer(object):
                 #print ("MICROCANVAS: [%s] %s" % (startTS , self.canvas))
                 microcanvasesStack.append(self.canvas)
                 microcanvasesByStartTS[startTS] = self.canvas
-            #logging.debug("iteratint segments for printing" % x)
-            #txt = seq.getLayer('text')
             logging.info( "printing Segment: " + txt )
             logging.info("(%s,%d)-(%s,%d)" % (startTS,startIdx,stopTS,stopIdx))
             if self.progressFeedback:   sys.stdout.write(txt)
@@ -449,7 +449,6 @@ class Visualizer(object):
             center1 = t.marker("anfang")
             posx,posy = center1
             segmpos[startTS] = center1
-
             if not self.sliceStrokes and not self.hideTSs:
                 if posx - lastx < 10 and lastnative:
                     flipper =  - flipper
@@ -466,16 +465,12 @@ class Visualizer(object):
                     self.canvas.text(posx,posy+self.tsYoff,"%s" % startTS[3:],[pyx.text.size.tiny,pyx.trafo.rotate(TSrot)])
                 else:
                     lastnative = False
-
             center2 = t.marker("ende")
             posx,posy = center2[:2]
-
             if self.sliceStrokes:
                 self.newCanvas(pyx.canvas.canvas())
-
         ### save the last segments end position -- then we should have all timestamps
         segmpos[stopTS] = center2
-
         #posy += 3
         #self.symbaker.putCross(posx,posy+self.tsYoff,tsSize,[pyx.color.rgb.blue])
         #if posx - lastx < 2:
@@ -501,7 +496,6 @@ class Visualizer(object):
                         strokeCount += 1
         currStrokeCount = 0
         oddStrokeCount = True
-
         #if self.progressFeedback:  sys.stdout.write("\n")
         for iid,startTS,startIdx,stopTS,stopIdx,intervaldata,subseq in aseq:
             if 'spatialElementID' in intervaldata:
@@ -522,15 +516,12 @@ class Visualizer(object):
                 stopclipping = True
             else:
                 stopclipping = False
-
             #if startTS in segmpos and stopTS in segmpos:
             startX,startY = segmpos[startTS]
             stopX,stopY = segmpos[stopTS]
-
             arrows = []
             if startclipping:   arrows.append(deco.barrow.large)
             if stopclipping:    arrows.append(deco.earrow.large)
-
             if intervaldata['IntervalType'] == 'STROKE':
                 ### remove
                 #iid = iid.replace(transcriptIDprefix,"")
@@ -538,12 +529,11 @@ class Visualizer(object):
                     if spatElID[:len(transcriptIDprefix)] == transcriptIDprefix:
                         spatElID = spatElID [len(transcriptIDprefix):]
                     else:
-                        raise InputError("encountered stroke with bad id prefix: %s (should be %s)" % (spatElID,transcriptIDprefix))
-
+                        raise InputError("encountered stroke with bad id prefix: %s (should be %s)"
+                                         % (spatElID,transcriptIDprefix))
                 if self.lastPrintedStrokeID == spatElID:
                     continue
                 spatElID = spatialIDprefix + spatElID
-
                 ### rotate color palette / count total required colours
                 self.strokecolors.rotate()
                 if self.progressFeedback:
@@ -551,27 +541,26 @@ class Visualizer(object):
                     sys.stdout.write("%d " % self.totalColourCount)
                     if self.totalColourCount % 10 == 0:
                         sys.stdout.write("\n")
-
-
-
                 ### draw the label for the stroke ID
                 if not self.hideIDs:
                     logging.info("DLATEX:%s" % cleanTexInput(spatElID))
-                    self.canvas.text(startX,startY+self.idYoff,cleanTexInput(spatElID),[pyx.text.size.tiny,text.valign.top,pyx.trafo.rotate(strokelabelrot)])
-
+                    self.canvas.text(startX, startY+self.idYoff,
+                                     cleanTexInput(spatElID),
+                                     [pyx.text.size.tiny,text.valign.top,pyx.trafo.rotate(strokelabelrot)])
                 if 'comment' in intervaldata and not self.hideComments:
                     logging.info("DLATEX:%s" % cleanTexInput(intervaldata['comment']))
-                    self.canvas.text(startX,startY+self.commentYoff,cleanTexInput(intervaldata['comment']),[pyx.text.size.tiny])
-
-                theline = pyx.path.line(startX,startY+strokeoffset,stopX,stopY+strokeoffset)
-                self.canvas.stroke(theline,[style.linewidth(self.strokewidth*self.txtstrokewidthscale),self.strokecolors.getColor()])
-
+                    self.canvas.text(startX, startY+self.commentYoff,
+                                     cleanTexInput(intervaldata['comment']),
+                                     [pyx.text.size.tiny])
+                theline = pyx.path.line(startX, startY+strokeoffset,
+                                        stopX, stopY+strokeoffset)
+                self.canvas.stroke(theline,
+                                   [style.linewidth(self.strokewidth*self.txtstrokewidthscale),
+                                    self.strokecolors.getColor()])
                 polygoneA = [(startX,startY+strokeoffset)]
-
                 textdeco = []
                 strokecolor = [self.strokecolors.getColor()]
                 strokedeco = copy.deepcopy(strokecolor)
-
                 ### go for all svgdocs until the spatElID returns some pathdata
                 try:
                     svgpathdata = None
@@ -589,15 +578,14 @@ class Visualizer(object):
                     drawedtrajectories = self.drawStroke(svgpathdata, intervaldata, strokedeco)
                     for traj in drawedtrajectories:
                         polygoneA.append(traj['markers'][0])
-
                 except ValueError as verr:
                     errX,errY = self.errorPos()
                     polygoneA.append((errX,errY))
                     errmsg = "[%s] %s" % (spatElID,verr.message)
                     logging.info("F-LATEX:%s" % cleanTexInput(errmsg))
-                    self.canvas.text(errX+5,errY,cleanTexInput(errmsg),[pyx.text.size.small])
+                    self.canvas.text(errX+5,errY,cleanTexInput(errmsg),
+                                     [pyx.text.size.small])
                     textdeco = [text.halign.boxright]
-
                 if drawTrajLabels:
                     textX,textY = polygoneA[1]
                     ### if one of the prefixes is present remove it
@@ -606,16 +594,16 @@ class Visualizer(object):
                             spatElIDstub = spatElID[len(pref):]
                             break
                     logging.info("G-LATEX:%s" % cleanTexInput(spatElID))
-                    self.canvas.text(textX+trajLabelOffsetX,textY+trajLabelOffsetY,cleanTexInput(spatElID),
-                                        [pyx.text.size.tiny,pyx.trafo.rotate(trajLabelRot)]+textdeco)
-
+                    self.canvas.text(textX+trajLabelOffsetX,
+                                     textY+trajLabelOffsetY,
+                                     cleanTexInput(spatElID),
+                                     [pyx.text.size.tiny,
+                                      pyx.trafo.rotate(trajLabelRot)]+textdeco)
                 self.symbaker.putPolygonC(polygoneA,strokecolor)
-
                 polygoneA = polygoneA[1:]
                 self.symbaker.putPolygonC(polygoneA,
                                           strokecolor + [ deco.filled(strokecolor+[pyx.color.transparency(0.9)]) ])
                 currStrokeCount += 1
-
                 ### every second -- and the last one in any case
                 if self.doubleSlice:
                     oddStrokeCount = not oddStrokeCount
@@ -628,59 +616,89 @@ class Visualizer(object):
                     Slices.append(self.canvas)
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
-
             elif intervaldata['IntervalType'] == 'PHRASE' and not self.sliceStrokes and not self.hidePhrases:
                 ### never needed interval ids printed really
-                self.canvas.stroke(pyx.path.line(startX,startY+self.phraseYoff,stopX,stopY+self.phraseYoff),
-                                        [pyx.color.rgb(0,0,0.8),style.linewidth(self.phraseHeight),pyx.color.transparency(0.8)])
+                self.canvas.stroke(pyx.path.line(startX, startY+self.phraseYoff,
+                                                 stopX, stopY+self.phraseYoff),
+                                        [pyx.color.rgb(0,0,0.8),
+                                         style.linewidth(self.phraseHeight),
+                                         pyx.color.transparency(0.8)])
                 if intervaldata['startblau'] and not startclipping:
-                    self.canvas.stroke(pyx.path.circle(startX,startY+self.phraseYoff+self.phraseHeight/3,self.phraseHeight/16),[pyx.color.rgb(0,0,0.8),deco.filled()])
-                if intervaldata['stopblau']and not stopclipping:
-                    self.canvas.stroke(pyx.path.circle(stopX,stopY+self.phraseYoff+self.phraseHeight/3,self.phraseHeight/16),[pyx.color.rgb(0,0,0.8),deco.filled()])
-
-            elif intervaldata['IntervalType'] == 'SPEAKER' and not self.sliceStrokes and not self.hideSpeakers:
+                    self.canvas.stroke(
+                            pyx.path.circle(startX,
+                                            startY+self.phraseYoff+self.phraseHeight/3,
+                                            self.phraseHeight/16),
+                            [pyx.color.rgb(0,0,0.8), deco.filled()])
+                if intervaldata['stopblau'] and not stopclipping:
+                    self.canvas.stroke(
+                            pyx.path.circle(stopX,
+                                            stopY+self.phraseYoff+self.phraseHeight/3,
+                                            self.phraseHeight/16),
+                            [pyx.color.rgb(0,0,0.8), deco.filled()])
+            elif (intervaldata['IntervalType'] == 'SPEAKER'
+                  and not self.sliceStrokes
+                  and not self.hideSpeakers):
                 speaker = intervaldata['Speaker']
                 if speaker not in self.speakers:
                     print ("    Adding an additional speaker: %s" % speaker)
                     self.speakers[speaker] = self.speakercolors.getColor(len(self.speakers))
-
                 speakercolor = self.speakers[speaker]
-
-
                 speakerVwidth = pyx.unit.x_pt *2
-                speakerline = pyx.path.line(startX,startY+speakerYoff,stopX,stopY+speakerYoff)
-                self.canvas.stroke(speakerline,[style.linewidth(self.speakerwidth),speakercolor])
+                speakerline = pyx.path.line(startX, startY+speakerYoff,
+                                            stopX, stopY+speakerYoff)
+                self.canvas.stroke(speakerline,
+                                   [style.linewidth(self.speakerwidth),
+                                    speakercolor])
                 if not startclipping:
-                    speakerlineVert = pyx.path.line(startX+speakerVwidth/2,startY+speakerYoff,startX+speakerVwidth/2,stopY)
-                    self.canvas.stroke(speakerlineVert,[style.linewidth(speakerVwidth),speakercolor])
-
+                    speakerlineVert = pyx.path.line(startX+speakerVwidth/2,
+                                                    startY+speakerYoff,
+                                                    startX+speakerVwidth/2,
+                                                    stopY)
+                    self.canvas.stroke(speakerlineVert,
+                                       [style.linewidth(speakerVwidth),
+                                        speakercolor])
                 logging.info("H-LATEX:%s" % cleanTexInput(speaker))
-                self.canvas.text(startX,startY+speakerlabeloffset,cleanTexInput(speaker),[pyx.text.size.tiny])
-
+                self.canvas.text(startX, startY+speakerlabeloffset,
+                                 cleanTexInput(speaker),
+                                 [pyx.text.size.tiny])
             elif intervaldata['IntervalType'] == 'FORMAT' and not self.sliceStrokes:
-
                 formatoffset = pyx.unit.x_pt*3
                 formatw = pyx.unit.x_pt * 5
                 formattransparency = 0.5
-
                 format = intervaldata['Format']
                 if format == 'RED+YELLOW':
                     if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX,startY+formatoffset,stopX,stopY+formatoffset)
-                        formatline2 = pyx.path.line(startX,startY+formatoffset+formatw/2,stopX,stopY+formatoffset+formatw/2)
-                        self.canvas.stroke(formatline1,[style.linewidth(formatw/2),pyx.color.rgb(1,1,0),pyx.color.transparency(formattransparency)])
-                        self.canvas.stroke(formatline2,[style.linewidth(formatw/2),pyx.color.rgb.red,pyx.color.transparency(formattransparency)])
+                        formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                                    stopX, stopY+formatoffset)
+                        formatline2 = pyx.path.line(startX, startY+formatoffset+formatw/2,
+                                                    stopX, stopY+formatoffset+formatw/2)
+                        self.canvas.stroke(formatline1,
+                                           [style.linewidth(formatw/2),
+                                            pyx.color.rgb(1,1,0),
+                                            pyx.color.transparency(formattransparency)])
+                        self.canvas.stroke(formatline2,
+                                           [style.linewidth(formatw/2),
+                                            pyx.color.rgb.red,
+                                            pyx.color.transparency(formattransparency)])
                 elif format == 'RED':
                     if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX,startY+formatoffset,stopX,stopY+formatoffset)
-                        self.canvas.stroke(formatline1,[style.linewidth(formatw),pyx.color.rgb.red,pyx.color.transparency(formattransparency)])
+                        formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                                    stopX, stopY+formatoffset)
+                        self.canvas.stroke(formatline1,
+                                           [style.linewidth(formatw),
+                                            pyx.color.rgb.red,
+                                            pyx.color.transparency(formattransparency)])
                 elif format == 'YELLOW':
                     if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX,startY+formatoffset,stopX,stopY+formatoffset)
-                        self.canvas.stroke(formatline1,[style.linewidth(formatw),pyx.color.rgb(1,1,0),pyx.color.transparency(formattransparency)])
-
+                        formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                                    stopX, stopY+formatoffset)
+                        self.canvas.stroke(formatline1,
+                                           [style.linewidth(formatw),
+                                            pyx.color.rgb(1,1,0),
+                                            pyx.color.transparency(formattransparency)])
                 elif format == 'STRIKE':
-                    formatline = pyx.path.line(startX,startY+formatoffset,stopX,stopY+formatoffset)
+                    formatline = pyx.path.line(startX, startY+formatoffset,
+                                               stopX, stopY+formatoffset)
                     self.canvas.stroke(formatline,[style.linewidth(formatw/8)])
         return Slices
 
@@ -693,18 +711,14 @@ class Visualizer(object):
         fingers = intervaldata['fingers']
         if 'holdstart' in intervaldata:     holdstart = intervaldata['holdstart']
         else:                               holdstart = ""
-
         if 'holdstop' in intervaldata:      holdstop = intervaldata['holdstop']
         else:                               holdstop = ""
-
         if 'hold' in intervaldata:          hold = intervaldata['hold']
         else:                               hold = ""
-
         ### both are sequences or exactly one single element
         strokedeco = copy.deepcopy(decoration)
         if not traj:
             raise InputError("Empty trajectory information.")
-
         err = False
         if fingers=='':
             print ("!!  Empty finger information in stroke")
@@ -719,13 +733,11 @@ class Visualizer(object):
                 for subtraj,f in zip(traj,fingers):
                     #self.drawTrajectoryElement(subtraj,f,decoration)
                     result.append(self.drawMovementTrajectory(subtraj,f,holdstart,holdstop,hold,strokedeco))
-
             elif len(traj)-len(fingers) == 1:
                 ### there is one hand with a movement
                 ### the other might be a static hand or a finger
                 ### n+1 trajectories, n finger infos
                 ### the hand must be the one with the two trajectories
-
                 foundit = False
                 for f in fingers:
                     if f in self.HANDCODES:
@@ -746,7 +758,6 @@ class Visualizer(object):
                         subtraj = traj[0]
                         traj = traj[1:]
                         result.append(self.drawMovementTrajectory(subtraj,f,holdstart,holdstop,hold,strokedeco))
-
             elif len(traj)-len(fingers) == 2:
                 ### there is two hands with movement
                 ### since both hands are hands there should be no single fingers
@@ -762,7 +773,6 @@ class Visualizer(object):
                 self.drawMovementTrajectory(m1,f1,holdstart,holdstop,hold,strokedeco)
                 result.append(self.drawHandShape(h2,f2,holdstart,holdstop,hold,strokedeco))
                 self.drawMovementTrajectory(m2,f2,holdstart,holdstop,hold,strokedeco)
-
             else:
                 ### there should be not more than a difference of two (two hands moving)
                 print ("!!  Mismatching fingers/trajectories: %s" % fingers)
@@ -785,16 +795,11 @@ class Visualizer(object):
 
     def drawHandShape(self,traj,handtype,holdstart,holdstop,hold,decor):
         handsymblinew = 3.0
-
         if traj['role'] != "HAND":
             raise InputError("inconcistent role for drawHandShape: %s" % traj)
-
         trajdeco = copy.deepcopy(decor) + [pyx.color.transparency(self.stroketransp),style.linestyle.dashdotted,style.linewidth(self.handstrokewidth)]
         symbdeco = copy.deepcopy(decor) + [style.linewidth(handsymblinew)]
-
         primaryHand = handtype.islower()
-
-
         if traj['move']in ['REPEAT','OSCILLATE']:
             symbdeco.append(style.dash([0.8,0.8]))
 
@@ -813,12 +818,10 @@ class Visualizer(object):
             ### flache Hand
             markers = self.drawSVGPath(traj['svgpath'],trajdeco)
             x,y = markers[0]
-#           self.symbaker.putSymbol('flatHandP',x,y,decoration=decor)
             if handtype == 'h':
                 self.symbaker.putSymbol('flatHandR',x,y,symbdeco)
             else:
                 self.symbaker.putSymbol('flatHandL',x,y,symbdeco)
-
         elif handtype in 'bB':
             ### Handruecken
             markers = self.drawSVGPath(traj['svgpath'],trajdeco)
@@ -827,38 +830,27 @@ class Visualizer(object):
                 self.symbaker.putSymbol('backHandR',x,y,symbdeco)
             else:
                 self.symbaker.putSymbol('backHandL',x,y,symbdeco)
-
-
         elif handtype in 'kK':
             ### Kralle
             markers = self.drawSVGPath(traj['svgpath'],trajdeco)
             x,y = markers[0]
             if primaryHand:
-                #print 'PRIM'
                 self.symbaker.putSymbol('\C',x,y,symbdeco)
             else:
-                #print 'SEC'
                 self.symbaker.putSymbol('/C',x,y,symbdeco)
-
         self.symbaker.resetSize()
         self.symbaker.setSizeOnce(self.symbolsize*1.8)
         if handtype in hold:
             self.symbaker.putSymbol('hold',x,y,decoration=symbdeco)
-
         self.symbaker.resetSize()
-
         traj['markers'] = markers
         return traj
 
     def drawMovementTrajectory(self,traj,finger,holdstart,holdstop,hold,decoration):
-        #trajdeco = copy.deepcopy(decoration)
-        #symbdeco = copy.deepcopy(decoration)
         trajdeco = copy.deepcopy(decoration) + [pyx.color.transparency(self.stroketransp)]
         symbdeco = copy.deepcopy(decoration)
-
         trajectoryStroke = True
 
-        #print "XXXX",traj['move']
         if traj['move'] == 'REPEAT':
             trajdeco += [style.dash([1.5,1.5])]
         elif traj['move'] == 'OSCILLATE':
@@ -900,9 +892,6 @@ class Visualizer(object):
                     trajdeco += [style.linewidth(self.strokewidth),style.dash([4,1])]
                 else:
                     trajdeco += [style.linewidth(self.strokewidth)]
-
-
-
         try:
             symb = self.finger2symbol[finger]
         except KeyError:
@@ -914,7 +903,6 @@ class Visualizer(object):
         else:
             symbdeco2 = symbdeco
 
-
         if traj['type'] == TRAJ_ORDINARY:
             markers = self.drawSVGPath(traj['svgpath'],trajdeco)
             x,y = markers[0]
@@ -922,13 +910,8 @@ class Visualizer(object):
             #print "cc", symbdeco
             if finger not in self.HANDCODES:
                 self.symbaker.putSymbol(symb,x,y,symbdeco2+[style.linewidth(self.symbolstrokewidth)])
-
         elif traj['type'] == TRAJ_SODIPODI:
             x,y = traj['centre']
-            #if traj['move'] != 'ONCE':
-            #   print "bb", decoration
-            #   self.drawSymbol('O',x,y,decoration=decoration,size=self.symbolsize*2)
-            #print "aa", symbdeco
             if traj['move']in ['REPEAT','OSCILLATE']:
                 self.symbaker.setSizeOnce(self.symbolsize*1.3)
                 markers = self.drawSymbol(symb,x,y,symbdeco2+[style.dash([0.5,0.5]),style.linewidth(self.symbolstrokewidth*1.4)])
@@ -943,26 +926,19 @@ class Visualizer(object):
         #   msg = "!!  Holdstart and hold stop for the same finger."
         #   print msg
         #   raise InputError(msg)
-
         #print "FI:%s HS:%s HO:%s"  % (finger,holdstart,hold)
         if finger in hold:
             x,y = markers[-1]
-            #self.symbaker.putSymbol('bigO',x,y,decoration=symbdeco+[style.linewidth(4),style.dash([1.7,1.7])])
             self.symbaker.putSymbol('hold',x,y,decoration=symbdeco)
         else:
             if finger in holdstart:
                 ### if there is a trajectory for that finger and a hold starts with this finger
                 ### the rule is that the hold starts at the end of the trajectory
                 x,y = markers[-1]
-                #self.symbaker.setSizeOnce(self.symbolsize*1.2)
                 self.symbaker.putSymbol('holdStart',x,y,decoration=symbdeco)
-                #self.symbaker.resetSize()
         if finger in holdstop:
                 x,y = markers[0]
                 self.symbaker.putSymbol('holdStop',x,y,decoration=symbdeco)
-
-        #if finger in holdstop:
-        #   self.symbaker.putSymbol('bigO',x,y,decoration=symbdeco+[style.dash([1,2])])
 
         traj['markers'] = markers
         return traj
@@ -975,7 +951,6 @@ class Visualizer(object):
     def drawSymbol(self,symbol,x,y,decoration):
         #self.canvas.stroke(path.circle(x,y,0.5), [sodicolor])
         #y = y*self.yfactor+self.yoffset
-
         ### used transform earlier
         x,y = self.tra.apply(x,y)
         self.symbaker.putSymbol(symbol,x,y,decoration)
@@ -991,52 +966,39 @@ class Visualizer(object):
         #    -160.36589,-3.25985 -213.98699,285.59403 72.1398,194.09053
         r = re.compile(r"\s+")
         r2 = re.compile(r",")
-
         plist =  r.split(pathdata)
-        #print "PLIST:%s" % plist
         begin = True
         com = ''
         param = []
         markerpoints = []
         pyxp = pyx.path.path()
         for p in plist:
-            #print "MARKERS:%s" % markerpoints
-            #print "P:%s" % p
             if p.isalpha():
-                #print "COM:%s" % p
                 com = p
                 if com in ['z','Z']:
                     ## close the Path
-                    #print "CLOSEPATH"
                     pyxp.append(pyx.path.closepath())
                     xalt,yalt=markerpoints[0]
                     markerpoints.append((xalt,yalt))
             else:
                 ### p must be a parameter
                 xstr,ystr = r2.split(p)
-                #print "PAR:%s" % p
                 x,y = (float(xstr),float(ystr))
-
-                #x,y = self.transform(x,y)
                 param.append( (x,y) )
-
                 if com == 'm':
                     if begin:
                         ## absolute move
-                        #print "moveto XY:%f,%f" % (x,y)
                         pyxp.append(pyx.path.moveto(x,y))
                         param = []
                         markerpoints.append((x,y))
                         begin = False
                     else:
                         ## relative move
-                        #print "rmoveto XY:%f,%f" % (x,y)
                         pyxp.append(pyx.path.rmoveto(x,y))
                         xalt,yalt=markerpoints[-1]
                         markerpoints.append((xalt+x,yalt+y))
                         param = []
                     com = 'l'   ## relative lineTo implicit command for follow-up parameters
-
                 elif com == 'M':
                     ## absolute move
                     #print "moveto2 XY:%f,%f" % (x,y)
@@ -1044,7 +1006,6 @@ class Visualizer(object):
                     param = []
                     markerpoints.append((x,y))
                     com = 'L'   ## absolute lineTo as implicit command for follow-ups
-
                 elif com == 'l':
                     ## relative lineTo
                     #print "rlineto XY:%f,%f" % (x,y)
@@ -1052,15 +1013,12 @@ class Visualizer(object):
                     xalt,yalt=markerpoints[-1]
                     markerpoints.append((xalt+x,yalt+y))
                     param = []
-
                 elif com == 'L':
                     ## absolute lineTo
                     #print "lineto XY:%f,%f" % (x,y)
                     pyxp.append(pyx.path.lineto(x,y))
                     param = []
                     markerpoints.append((x,y))
-
-
                 elif com == 'c' and len(param) == 3:
                     ## relative curveTo
                     x1,y1 = param[0]
@@ -1073,8 +1031,6 @@ class Visualizer(object):
                     xalt,yalt=markerpoints[-1]
                     param = []
                     markerpoints.append((xalt+x,yalt+y))
-
-
                 elif com == 'C' and len(param) == 3:
                     ## absolute curveTo
                     x1,y1 = param[0]
