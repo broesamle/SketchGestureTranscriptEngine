@@ -401,6 +401,120 @@ class Visualizer(object):
         segmpos[stopTS] = center2
         return segmpos
 
+    def _drawStrokeSequential(self, spatElID,
+                              startX, startY, stopX, stopY, intervaldata):
+        """Draw the stroke in the sequence.
+        Returns a list with one point [(x,y)]; (x,y) being the start point for the connector line.
+            """
+        strokelabelrot = 330
+        strokeoffset = self.textFontSize + (self.strokewidth*self.txtstrokewidthscale*0.5)
+        ### draw the label for the stroke ID
+        if not self.hideIDs:
+            logging.info("DLATEX:%s" % cleanTexInput(spatElID))
+            self.canvas.text(startX, startY+self.idYoff,
+                             cleanTexInput(spatElID),
+                             [pyx.text.size.tiny,text.valign.top,pyx.trafo.rotate(strokelabelrot)])
+        if 'comment' in intervaldata and not self.hideComments:
+            logging.info("DLATEX:%s" % cleanTexInput(intervaldata['comment']))
+            self.canvas.text(startX, startY+self.commentYoff,
+                             cleanTexInput(intervaldata['comment']),
+                             [pyx.text.size.tiny])
+        theline = pyx.path.line(startX, startY+strokeoffset,
+                                stopX, stopY+strokeoffset)
+        self.canvas.stroke(theline,
+                           [style.linewidth(self.strokewidth*self.txtstrokewidthscale),
+                            self.strokecolors.getColor()])
+        return [(startX,startY+strokeoffset)]
+
+    def _drawPhrase(self, startX, startY, stopX, stopY,
+                    intervaldata, startclipping, stopclipping):
+        self.canvas.stroke(pyx.path.line(startX, startY+self.phraseYoff,
+                                         stopX, stopY+self.phraseYoff),
+                                [pyx.color.rgb(0,0,0.8),
+                                 style.linewidth(self.phraseHeight),
+                                 pyx.color.transparency(0.8)])
+        if intervaldata['startblau'] and not startclipping:
+            self.canvas.stroke(
+                    pyx.path.circle(startX,
+                                    startY+self.phraseYoff+self.phraseHeight/3,
+                                    self.phraseHeight/16),
+                    [pyx.color.rgb(0,0,0.8), deco.filled()])
+        if intervaldata['stopblau'] and not stopclipping:
+            self.canvas.stroke(
+                    pyx.path.circle(stopX,
+                                    stopY+self.phraseYoff+self.phraseHeight/3,
+                                    self.phraseHeight/16),
+                    [pyx.color.rgb(0,0,0.8), deco.filled()])
+
+    def _drawSpeaker(self, startX, startY, stopX, stopY,
+                     intervaldata, startclipping):
+        speakerYoff =  self.idYoff - self.phraseHeight - self.speakerwidth
+        speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
+        speaker = intervaldata['Speaker']
+        if speaker not in self.speakers:
+            print ("    Adding an additional speaker: %s" % speaker)
+            self.speakers[speaker] = self.speakercolors.getColor(len(self.speakers))
+        speakercolor = self.speakers[speaker]
+        speakerVwidth = pyx.unit.x_pt *2
+        speakerline = pyx.path.line(startX, startY+speakerYoff,
+                                    stopX, stopY+speakerYoff)
+        self.canvas.stroke(speakerline,
+                           [style.linewidth(self.speakerwidth),
+                            speakercolor])
+        if not startclipping:
+            speakerlineVert = pyx.path.line(startX+speakerVwidth/2,
+                                            startY+speakerYoff,
+                                            startX+speakerVwidth/2,
+                                            stopY)
+            self.canvas.stroke(speakerlineVert,
+                               [style.linewidth(speakerVwidth),
+                                speakercolor])
+        logging.info("H-LATEX:%s" % cleanTexInput(speaker))
+        self.canvas.text(startX, startY+speakerlabeloffset,
+                         cleanTexInput(speaker),
+                         [pyx.text.size.tiny])
+
+    def _drawFormat(self, startX, startY, stopX, stopY, intervaldata):
+        formatoffset = pyx.unit.x_pt*3
+        formatw = pyx.unit.x_pt * 5
+        formattransparency = 0.5
+        format = intervaldata['Format']
+        if format == 'RED+YELLOW':
+            if not self.hideColouredFormatBars:
+                formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                            stopX, stopY+formatoffset)
+                formatline2 = pyx.path.line(startX, startY+formatoffset+formatw/2,
+                                            stopX, stopY+formatoffset+formatw/2)
+                self.canvas.stroke(formatline1,
+                                   [style.linewidth(formatw/2),
+                                    pyx.color.rgb(1,1,0),
+                                    pyx.color.transparency(formattransparency)])
+                self.canvas.stroke(formatline2,
+                                   [style.linewidth(formatw/2),
+                                    pyx.color.rgb.red,
+                                    pyx.color.transparency(formattransparency)])
+        elif format == 'RED':
+            if not self.hideColouredFormatBars:
+                formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                            stopX, stopY+formatoffset)
+                self.canvas.stroke(formatline1,
+                                   [style.linewidth(formatw),
+                                    pyx.color.rgb.red,
+                                    pyx.color.transparency(formattransparency)])
+        elif format == 'YELLOW':
+            if not self.hideColouredFormatBars:
+                formatline1 = pyx.path.line(startX, startY+formatoffset,
+                                            stopX, stopY+formatoffset)
+                self.canvas.stroke(formatline1,
+                                   [style.linewidth(formatw),
+                                    pyx.color.rgb(1,1,0),
+                                    pyx.color.transparency(formattransparency)])
+        elif format == 'STRIKE':
+            formatline = pyx.path.line(startX, startY+formatoffset,
+                                       stopX, stopY+formatoffset)
+            self.canvas.stroke(formatline,[style.linewidth(formatw/8)])
+
+
     def drawIntervalsBetween(self,
                              aseq,
                              inpointIdx, outpointIdx,
@@ -445,17 +559,13 @@ class Visualizer(object):
         if not textPos:
             textPos = self.textY
         posx,posy = self.textX,textPos
-        strokeoffset = self.textFontSize + (self.strokewidth*self.txtstrokewidthscale*0.5)
-        strokelabelrot = 330
         #### see below ### connwidth = 0.5
-        speakerYoff =  self.idYoff - self.phraseHeight - self.speakerwidth
-        speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
+        #connwidth = 1
         speakertransparency = 0.0
         trajLabelOffsetX = 5
         trajLabelOffsetY = 5
         trajLabelRot = 45
         #tsOffset
-        connwidth = 1
         lastx = -1000
         ## segmpos: the positions of the markers of all segments
         # ... independent of the interval structure behind it
@@ -519,26 +629,14 @@ class Visualizer(object):
                 self.strokecolors.rotate()
                 if self.progressFeedback:
                     self.totalColourCount += 1
-                    sys.stdout.write("%d " % self.totalColourCount)
-                    if self.totalColourCount % 10 == 0:
-                        sys.stdout.write("\n")
-                ### draw the label for the stroke ID
-                if not self.hideIDs:
-                    logging.info("DLATEX:%s" % cleanTexInput(spatElID))
-                    self.canvas.text(startX, startY+self.idYoff,
-                                     cleanTexInput(spatElID),
-                                     [pyx.text.size.tiny,text.valign.top,pyx.trafo.rotate(strokelabelrot)])
-                if 'comment' in intervaldata and not self.hideComments:
-                    logging.info("DLATEX:%s" % cleanTexInput(intervaldata['comment']))
-                    self.canvas.text(startX, startY+self.commentYoff,
-                                     cleanTexInput(intervaldata['comment']),
-                                     [pyx.text.size.tiny])
-                theline = pyx.path.line(startX, startY+strokeoffset,
-                                        stopX, stopY+strokeoffset)
-                self.canvas.stroke(theline,
-                                   [style.linewidth(self.strokewidth*self.txtstrokewidthscale),
-                                    self.strokecolors.getColor()])
-                polygoneA = [(startX,startY+strokeoffset)]
+                polygoneA = self._drawStrokeSequential(spatElID,
+                                                       startX,
+                                                       startY,
+                                                       stopX,
+                                                       stopY,
+                                                       intervaldata)
+                ### At this stage: polygoneA contains one point, only.
+                ### More points will be added, before printing the final version.
                 textdeco = []
                 strokecolor = [self.strokecolors.getColor()]
                 strokedeco = copy.deepcopy(strokecolor)
@@ -552,16 +650,15 @@ class Visualizer(object):
                             print ("!!  [%s] Error getting SVG path data: %s" % (spatElID,Verr.message))
                         if svgpathdata:
                             break
-
                     if not svgpathdata:
                         print ("!!  missing trajectory data for spatial element %s" % spatElID)
-
                     drawedtrajectories = self.drawStroke(svgpathdata, intervaldata, strokedeco)
                     for traj in drawedtrajectories:
                         polygoneA.append(traj['markers'][0])
                 except ValueError as verr:
+                    ### Put error info into the graphical output
                     errX,errY = self.errorPos()
-                    polygoneA.append((errX,errY))
+                    polygoneA.append((errX,errY)) # add to connector polygone
                     errmsg = "[%s] %s" % (spatElID,verr.message)
                     logging.info("F-LATEX:%s" % cleanTexInput(errmsg))
                     self.canvas.text(errX+5,errY,cleanTexInput(errmsg),
@@ -581,6 +678,7 @@ class Visualizer(object):
                                      [pyx.text.size.tiny,
                                       pyx.trafo.rotate(trajLabelRot)]+textdeco)
                 self.symbaker.putPolygonC(polygoneA,strokecolor)
+                ### remove start point and draw connector polygone again
                 polygoneA = polygoneA[1:]
                 self.symbaker.putPolygonC(polygoneA,
                                           strokecolor + [ deco.filled(strokecolor+[pyx.color.transparency(0.9)]) ])
@@ -594,89 +692,15 @@ class Visualizer(object):
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
             elif intervaldata['IntervalType'] == 'PHRASE' and not self.sliceStrokes and not self.hidePhrases:
-                ### never needed interval ids printed really
-                self.canvas.stroke(pyx.path.line(startX, startY+self.phraseYoff,
-                                                 stopX, stopY+self.phraseYoff),
-                                        [pyx.color.rgb(0,0,0.8),
-                                         style.linewidth(self.phraseHeight),
-                                         pyx.color.transparency(0.8)])
-                if intervaldata['startblau'] and not startclipping:
-                    self.canvas.stroke(
-                            pyx.path.circle(startX,
-                                            startY+self.phraseYoff+self.phraseHeight/3,
-                                            self.phraseHeight/16),
-                            [pyx.color.rgb(0,0,0.8), deco.filled()])
-                if intervaldata['stopblau'] and not stopclipping:
-                    self.canvas.stroke(
-                            pyx.path.circle(stopX,
-                                            stopY+self.phraseYoff+self.phraseHeight/3,
-                                            self.phraseHeight/16),
-                            [pyx.color.rgb(0,0,0.8), deco.filled()])
+                self._drawPhrase(startX, startY, stopX, stopY,
+                                 intervaldata, startclipping, stopclipping)
             elif (intervaldata['IntervalType'] == 'SPEAKER'
                   and not self.sliceStrokes
                   and not self.hideSpeakers):
-                speaker = intervaldata['Speaker']
-                if speaker not in self.speakers:
-                    print ("    Adding an additional speaker: %s" % speaker)
-                    self.speakers[speaker] = self.speakercolors.getColor(len(self.speakers))
-                speakercolor = self.speakers[speaker]
-                speakerVwidth = pyx.unit.x_pt *2
-                speakerline = pyx.path.line(startX, startY+speakerYoff,
-                                            stopX, stopY+speakerYoff)
-                self.canvas.stroke(speakerline,
-                                   [style.linewidth(self.speakerwidth),
-                                    speakercolor])
-                if not startclipping:
-                    speakerlineVert = pyx.path.line(startX+speakerVwidth/2,
-                                                    startY+speakerYoff,
-                                                    startX+speakerVwidth/2,
-                                                    stopY)
-                    self.canvas.stroke(speakerlineVert,
-                                       [style.linewidth(speakerVwidth),
-                                        speakercolor])
-                logging.info("H-LATEX:%s" % cleanTexInput(speaker))
-                self.canvas.text(startX, startY+speakerlabeloffset,
-                                 cleanTexInput(speaker),
-                                 [pyx.text.size.tiny])
+                self._drawSpeaker(startX, startY, stopX, stopY,
+                                  intervaldata, startclipping)
             elif intervaldata['IntervalType'] == 'FORMAT' and not self.sliceStrokes:
-                formatoffset = pyx.unit.x_pt*3
-                formatw = pyx.unit.x_pt * 5
-                formattransparency = 0.5
-                format = intervaldata['Format']
-                if format == 'RED+YELLOW':
-                    if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX, startY+formatoffset,
-                                                    stopX, stopY+formatoffset)
-                        formatline2 = pyx.path.line(startX, startY+formatoffset+formatw/2,
-                                                    stopX, stopY+formatoffset+formatw/2)
-                        self.canvas.stroke(formatline1,
-                                           [style.linewidth(formatw/2),
-                                            pyx.color.rgb(1,1,0),
-                                            pyx.color.transparency(formattransparency)])
-                        self.canvas.stroke(formatline2,
-                                           [style.linewidth(formatw/2),
-                                            pyx.color.rgb.red,
-                                            pyx.color.transparency(formattransparency)])
-                elif format == 'RED':
-                    if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX, startY+formatoffset,
-                                                    stopX, stopY+formatoffset)
-                        self.canvas.stroke(formatline1,
-                                           [style.linewidth(formatw),
-                                            pyx.color.rgb.red,
-                                            pyx.color.transparency(formattransparency)])
-                elif format == 'YELLOW':
-                    if not self.hideColouredFormatBars:
-                        formatline1 = pyx.path.line(startX, startY+formatoffset,
-                                                    stopX, stopY+formatoffset)
-                        self.canvas.stroke(formatline1,
-                                           [style.linewidth(formatw),
-                                            pyx.color.rgb(1,1,0),
-                                            pyx.color.transparency(formattransparency)])
-                elif format == 'STRIKE':
-                    formatline = pyx.path.line(startX, startY+formatoffset,
-                                               stopX, stopY+formatoffset)
-                    self.canvas.stroke(formatline,[style.linewidth(formatw/8)])
+                self._drawFormat(startX, startY, stopX, stopY, intervaldata)
         return Slices
 
     ### low level drawing for strokes etc ... these also take svg coordinates
