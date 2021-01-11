@@ -691,16 +691,18 @@ class Visualizer(object):
                     Slices.append(self.canvas)
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
-            elif intervaldata['IntervalType'] == 'PHRASE' and not self.sliceStrokes and not self.hidePhrases:
-                self._drawPhrase(startX, startY, stopX, stopY,
-                                 intervaldata, startclipping, stopclipping)
-            elif (intervaldata['IntervalType'] == 'SPEAKER'
-                  and not self.sliceStrokes
-                  and not self.hideSpeakers):
-                self._drawSpeaker(startX, startY, stopX, stopY,
-                                  intervaldata, startclipping)
-            elif intervaldata['IntervalType'] == 'FORMAT' and not self.sliceStrokes:
-                self._drawFormat(startX, startY, stopX, stopY, intervaldata)
+                continue
+            if not self.sliceStrokes:
+                if (intervaldata['IntervalType'] == 'PHRASE'
+                      and not self.hidePhrases):
+                    self._drawPhrase(startX, startY, stopX, stopY,
+                                     intervaldata, startclipping, stopclipping)
+                elif (intervaldata['IntervalType'] == 'SPEAKER'
+                      and not self.hideSpeakers):
+                    self._drawSpeaker(startX, startY, stopX, stopY,
+                                      intervaldata, startclipping)
+                elif intervaldata['IntervalType'] == 'FORMAT':
+                    self._drawFormat(startX, startY, stopX, stopY, intervaldata)
         return Slices
 
     ### low level drawing for strokes etc ... these also take svg coordinates
