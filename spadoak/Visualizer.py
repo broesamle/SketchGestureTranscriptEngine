@@ -567,8 +567,7 @@ class Visualizer(object):
         trajLabelRot = 45
         #tsOffset
         lastx = -1000
-        ## segmpos: the positions of the markers of all segments
-        # ... independent of the interval structure behind it
+
         if self.sliceStrokes:
             Slices=[]
             microcanvasesByStartTS = {}
@@ -576,12 +575,17 @@ class Visualizer(object):
         else:
             Slices=[self.canvas]
             microcanvasesByStartTS = None
-        segmpos = self._drawTextForSequential(aseq,
-                                              inpointIdx,
-                                              outpointIdx,
-                                              posx,
-                                              posy,
-                                              microcanvasesByStartTS)
+        if not self.hideSeq:
+            ## segmpos: the positions of the markers of all segments
+            # ... independent of the interval structure behind it
+            segmpos = self._drawTextForSequential(aseq,
+                                                  inpointIdx,
+                                                  outpointIdx,
+                                                  posx,
+                                                  posy,
+                                                  microcanvasesByStartTS)
+        else:
+            raise NotImplementedError("--hidesequential Option still under development.")
         if self.sliceStrokes:
             self.newCanvas()
         ### this loop follows the logic of intevals (coded subsequences)
@@ -629,12 +633,16 @@ class Visualizer(object):
                 self.strokecolors.rotate()
                 if self.progressFeedback:
                     self.totalColourCount += 1
-                polygoneA = self._drawStrokeSequential(spatElID,
-                                                       startX,
-                                                       startY,
-                                                       stopX,
-                                                       stopY,
-                                                       intervaldata)
+                if not self.hideSeq:
+                    polygoneA = self._drawStrokeSequential(spatElID,
+                                                           startX,
+                                                           startY,
+                                                           stopX,
+                                                           stopY,
+                                                           intervaldata)
+                else:
+                    raise NotImplementedError("--hidesequential Option still under development.")
+                    ## polygoneA = []
                 ### At this stage: polygoneA contains one point, only.
                 ### More points will be added, before printing the final version.
                 textdeco = []
@@ -692,7 +700,7 @@ class Visualizer(object):
                     self.newCanvas(pyx.canvas.canvas())
                     self.lastPrintedStrokeID = spatElID
                 continue
-            if not self.sliceStrokes:
+            if not self.sliceStrokes and not self.hideSeq:
                 if (intervaldata['IntervalType'] == 'PHRASE'
                       and not self.hidePhrases):
                     self._drawPhrase(startX, startY, stopX, stopY,
