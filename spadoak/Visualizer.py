@@ -591,8 +591,6 @@ class Visualizer(object):
                                                   posx,
                                                   posy,
                                                   microcanvasesByStartTS)
-        else:
-            raise NotImplementedError("--hidesequential Option still under development.")
         if self.sliceStrokes:
             self.newCanvas()
         ### this loop follows the logic of intevals (coded subsequences)
@@ -674,22 +672,23 @@ class Visualizer(object):
                     self.canvas.text(errX+5,errY,cleanTexInput(errmsg),
                                      [pyx.text.size.small])
                     textdeco = [text.halign.boxright]
-                if drawTrajLabels:
-                    textX,textY = polygoneA[1]
-                    ### if one of the prefixes is present remove it
-                    for pref in trajLabelPrefixes:
-                        if spatElID[len(pref)] == pref:
-                            spatElIDstub = spatElID[len(pref):]
-                            break
-                    logging.info("G-LATEX:%s" % cleanTexInput(spatElID))
-                    self.canvas.text(textX+trajLabelOffsetX,
-                                     textY+trajLabelOffsetY,
-                                     cleanTexInput(spatElID),
-                                     [pyx.text.size.tiny,
-                                      pyx.trafo.rotate(trajLabelRot)]+textdeco)
-                self.symbaker.putPolygonC(polygoneA,strokecolor)
-                ### remove start point and draw connector polygone again
-                polygoneA = polygoneA[1:]
+                if not self.hideSeq:
+                    if drawTrajLabels:
+                        textX,textY = polygoneA[1]
+                        ### if one of the prefixes is present remove it
+                        for pref in trajLabelPrefixes:
+                            if spatElID[len(pref)] == pref:
+                                spatElIDstub = spatElID[len(pref):]
+                                break
+                        logging.info("G-LATEX:%s" % cleanTexInput(spatElID))
+                        self.canvas.text(textX+trajLabelOffsetX,
+                                         textY+trajLabelOffsetY,
+                                         cleanTexInput(spatElID),
+                                         [pyx.text.size.tiny,
+                                          pyx.trafo.rotate(trajLabelRot)]+textdeco)
+                    self.symbaker.putPolygonC(polygoneA,strokecolor)
+                    ### remove start point and draw connector polygone again
+                    polygoneA = polygoneA[1:]
                 self.symbaker.putPolygonC(polygoneA,
                                           strokecolor + [ deco.filled(strokecolor+[pyx.color.transparency(0.9)]) ])
                 ### every second -- and the last one in any case
