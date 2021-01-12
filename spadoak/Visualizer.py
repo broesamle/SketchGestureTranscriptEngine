@@ -401,11 +401,11 @@ class Visualizer(object):
         segmpos[stopTS] = center2
         return segmpos
 
-    def _drawStrokeSequential(self, spatElID,
-                              startX, startY, stopX, stopY, intervaldata):
+    def _drawStrokeSequential(self, spatElID, seqpos, intervaldata):
         """Draw the stroke in the sequence.
         Returns a list with one point [(x,y)]; (x,y) being the start point for the connector line.
             """
+        startX, startY, stopX, stopY = seqpos
         strokelabelrot = 330
         strokeoffset = self.textFontSize + (self.strokewidth*self.txtstrokewidthscale*0.5)
         ### draw the label for the stroke ID
@@ -426,8 +426,9 @@ class Visualizer(object):
                             self.strokecolors.getColor()])
         return [(startX,startY+strokeoffset)]
 
-    def _drawPhrase(self, startX, startY, stopX, stopY,
+    def _drawPhrase(self, seqpos,
                     intervaldata, startclipping, stopclipping):
+        startX, startY, stopX, stopY = seqpos
         self.canvas.stroke(pyx.path.line(startX, startY+self.phraseYoff,
                                          stopX, stopY+self.phraseYoff),
                                 [pyx.color.rgb(0,0,0.8),
@@ -446,8 +447,9 @@ class Visualizer(object):
                                     self.phraseHeight/16),
                     [pyx.color.rgb(0,0,0.8), deco.filled()])
 
-    def _drawSpeaker(self, startX, startY, stopX, stopY,
+    def _drawSpeaker(self, seqpos,
                      intervaldata, startclipping):
+        startX, startY, stopX, stopY = seqpos
         speakerYoff =  self.idYoff - self.phraseHeight - self.speakerwidth
         speakerlabeloffset = speakerYoff-self.speakerwidth/2.0
         speaker = intervaldata['Speaker']
@@ -474,7 +476,8 @@ class Visualizer(object):
                          cleanTexInput(speaker),
                          [pyx.text.size.tiny])
 
-    def _drawFormat(self, startX, startY, stopX, stopY, intervaldata):
+    def _drawFormat(self, seqpos, intervaldata):
+        startX, startY, stopX, stopY = seqpos
         formatoffset = pyx.unit.x_pt*3
         formatw = pyx.unit.x_pt * 5
         formattransparency = 0.5
@@ -514,6 +517,10 @@ class Visualizer(object):
                                        stopX, stopY+formatoffset)
             self.canvas.stroke(formatline,[style.linewidth(formatw/8)])
 
+    def _getseqpos(segmpos, startTS, stopTS):
+        startX, startY = segmpos[startTS]
+        stopX, stopY = segmpos[stopTS]
+        return startX, startY, stopX, stopY
 
     def drawIntervalsBetween(self,
                              aseq,
@@ -611,9 +618,6 @@ class Visualizer(object):
                 stopclipping = True
             else:
                 stopclipping = False
-            #if startTS in segmpos and stopTS in segmpos:
-            startX,startY = segmpos[startTS]
-            stopX,stopY = segmpos[stopTS]
             arrows = []
             if startclipping:   arrows.append(deco.barrow.large)
             if stopclipping:    arrows.append(deco.earrow.large)
@@ -635,14 +639,12 @@ class Visualizer(object):
                     self.totalColourCount += 1
                 if not self.hideSeq:
                     polygoneA = self._drawStrokeSequential(spatElID,
-                                                           startX,
-                                                           startY,
-                                                           stopX,
-                                                           stopY,
-                                                           intervaldata)
+                                        Visualizer._getseqpos(segmpos,
+                                                              startTS,
+                                                              stopTS),
+                                        intervaldata)
                 else:
-                    raise NotImplementedError("--hidesequential Option still under development.")
-                    ## polygoneA = []
+                    polygoneA = []
                 ### At this stage: polygoneA contains one point, only.
                 ### More points will be added, before printing the final version.
                 textdeco = []
@@ -703,14 +705,21 @@ class Visualizer(object):
             if not self.sliceStrokes and not self.hideSeq:
                 if (intervaldata['IntervalType'] == 'PHRASE'
                       and not self.hidePhrases):
-                    self._drawPhrase(startX, startY, stopX, stopY,
+                    self._drawPhrase(Visualizer._getseqpos(segmpos,
+                                                           startTS,
+                                                           stopTS),
                                      intervaldata, startclipping, stopclipping)
                 elif (intervaldata['IntervalType'] == 'SPEAKER'
                       and not self.hideSpeakers):
-                    self._drawSpeaker(startX, startY, stopX, stopY,
+                    self._drawSpeaker(Visualizer._getseqpos(segmpos,
+                                                           startTS,
+                                                           stopTS),
                                       intervaldata, startclipping)
                 elif intervaldata['IntervalType'] == 'FORMAT':
-                    self._drawFormat(startX, startY, stopX, stopY, intervaldata)
+                    self._drawFormat(Visualizer._getseqpos(segmpos,
+                                                           startTS,
+                                                           stopTS),
+                                     intervaldata)
         return Slices
 
     ### low level drawing for strokes etc ... these also take svg coordinates
