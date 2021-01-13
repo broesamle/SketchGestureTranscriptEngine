@@ -161,32 +161,26 @@ class SeqProcessor(object):
                                  backgroundPage=False,
                                  bbox=None,
                                  bboxtext=False):
-
         """ The function processes an annotated sequence into a PDF file using a given visualiser.
         inIdx/outIdx are used to slice within that sequence. The function is used for reacting on precise begin/end parameters by the user
         selected pages are a subordinary parameter for skipping pages in the output generation.
         """
 
         ### when not told otherwise, do the whole sequence
-
         ### indicate that a print region has been explicitly specified
         if inIdx or outIdx:
             printRegion = True
         else:
             printRegion = False
-
-
         if not inIdx:
             inIdx = 0
         if not outIdx:
             outIdx = len(aseq)
-
         logging.info ("Processing Interval: %s..%s TPL:%d GPL:%d simulate=%s" %(inIdx,outIdx,textPageLen,graphPageLen,simulate) )
         printOutIdx = outIdx
         currstop = inIdx + graphPageLen
         lastPrintPos = inIdx
         pagecounter = 1
-
         if not outputFileSuffix:
             if printRegion:
                 try:
@@ -200,7 +194,6 @@ class SeqProcessor(object):
                 PDFfname += '.PageExtr'
         else:
             PDFfname += outputFileSuffix
-
         if not simulate:
             self._startdoc(PDFpath, PDFfname)
         textPresent = False
@@ -208,35 +201,25 @@ class SeqProcessor(object):
         while lastPrintPos < printOutIdx:
             #logging.info ("processing interval %s: %s/%d..%s/%d  %s" %  (iid,startTS,startIdx,stopTS,stopIdx,data) )
             #logging.info("processing interval(%s,%d,%s,%d,%s)" % (startTS,startIdx,stopTS,stopIdx,data))
-
             ### checking for strokes (e.g. spatial output)
             spatialPresent = False
-
             #print "touching intevals for %d..%d" % (currstop-graphPageLen,currstop)
             for iid,startTS,startIdx,stopTS,stopIdx,data in aseq.touchingIntervalsByIdx(currstop-graphPageLen,currstop):
-
                 if data['IntervalType'] == 'STROKE':
                     spatialPresent = True
                     #print "Spatial/Graphical Content ahead."
                     break
-
             if (spatialPresent and textPresent) or currstop - lastPrintPos >= textPageLen:
                 ### if there is enough text for a text page or graphics ahead...
                 ### in both cases we print the text just *bevore* the stop pos
                 if selectedPages == [] or pagecounter in selectedPages:
                     print ("TEXT-PAGE: %d  %d..%d" % (pagecounter, lastPrintPos, currstop-graphPageLen))
-
-                    #try:
                     if not simulate:
                         self.vis.newCanvas()
-
                         pageInfo = "%d (%d..%d)" % (pagecounter,lastPrintPos,(currstop-graphPageLen))
                         self.vis.setMetaData(page=pageInfo)
-
-                        #print ("lpp:%d currstop:%d gpl:%d" % (lastPrintPos,currstop,graphPageLen))
                         drawnCanvases = self.vis.drawIntervalsBetween(aseq,lastPrintPos,
                                     currstop-graphPageLen,self.loadedTraj.getAllLoaded())
-                        #self.vis.drawMarkers('LR')
                         self.vis.drawInfoHeaders()
                         print ("    appending page %d" % pagecounter)
                         for can in drawnCanvases:
@@ -250,16 +233,12 @@ class SeqProcessor(object):
                         print ("    simulated page %d" % pagecounter)
                 else:
                     print ("    not printing page %d" % pagecounter)
-
                 lastPrintPos = currstop-graphPageLen
                 textPresent = False
                 pagecounter += 1
-
             if spatialPresent:
-                ### print the spatial stuff.
                 if selectedPages == [] or pagecounter in selectedPages:
                     print ("GRFX-PAGE: %d  %d..%d" % (pagecounter, lastPrintPos, currstop))
-                    #try:
                     if not simulate:
                         self.vis.newCanvas()
                         self.vis.drawBackgroundImage()
@@ -267,7 +246,6 @@ class SeqProcessor(object):
                         self.vis.setMetaData(page=pageInfo)
                         drawnCanvases = self.vis.drawIntervalsBetween(aseq,lastPrintPos,currstop,self.loadedTraj.getAllLoaded(),
                                     transcriptIDprefix=transcrIdPrefix,spatialIDprefix=spatialIdPrefix)
-
                         self.vis.drawMarkers()
                         self.vis.drawInfoHeaders()
                         print ("    appending page %d" % pagecounter)
@@ -278,7 +256,6 @@ class SeqProcessor(object):
                         print ("    simulated page %d" % pagecounter)
                 else:
                     print ("    not printing page %d" % pagecounter)
-
                 pagecounter += 1
                 lastPrintPos = currstop
             else:
@@ -286,7 +263,6 @@ class SeqProcessor(object):
                 ### then there will be text present next round
                 textPresent = True
             currstop += graphPageLen
-
         if not simulate:
             if backgroundPage:
                 #self.vis.setMetaData(" "," "," "," ")

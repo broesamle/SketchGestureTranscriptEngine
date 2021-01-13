@@ -743,7 +743,6 @@ class Visualizer(object):
             print ("!!  Empty finger information in stroke")
             err = True
             fingers = 'X'
-
         if type(traj) == list:
             result = []
             ### composed multi finger trajectory
@@ -806,7 +805,6 @@ class Visualizer(object):
             if len(fingers) != 1:
                 print ("!!  Mismatching fingers/trajectories: %s/%s" % (fingers,traj))
                 raise InputError("!!  Mismatching fingers/trajectories: %s" % fingers)
-
             if fingers in self.HANDCODES:
                 return [self.drawHandShape(traj,fingers[0],holdstart,holdstop,hold,strokedeco)]
             else:
