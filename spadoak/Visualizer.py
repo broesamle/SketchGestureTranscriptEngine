@@ -574,7 +574,6 @@ class Visualizer(object):
         trajLabelRot = 45
         #tsOffset
         lastx = -1000
-
         if self.sliceStrokes:
             Slices=[]
             microcanvasesByStartTS = {}
@@ -795,7 +794,6 @@ class Visualizer(object):
                 ### there should be not more than a difference of two (two hands moving)
                 print ("!!  Mismatching fingers/trajectories: %s" % fingers)
                 raise InputError("!!  Mismatching fingers/trajectories: %s" % fingers)
-
             if err:
                 x,y = resultresult[:2]
                 self.canvas.text(x,y,"!!  Empty Finger Info")

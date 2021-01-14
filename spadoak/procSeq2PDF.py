@@ -127,7 +127,6 @@ class SeqProcessor(object):
             self.PDFpath = PDFpath
         if PDFfname is not None:
             self.PDFfname = PDFfname
-        # print ("NEW PDF-DOC:%s  PAGES:%s" % (pdfDoc, pdfDoc.pages))
 
     def _procpage(self, page):
         logging.info ("Writing one page to PDF (%d)." % self.doccounter)
@@ -223,7 +222,6 @@ class SeqProcessor(object):
                         self.vis.drawInfoHeaders()
                         print ("    appending page %d" % pagecounter)
                         for can in drawnCanvases:
-                            print ("    slice")
                             if bboxtext:
                                 page = self.canvas2page(can,bbox)
                             else:
