@@ -25,8 +25,13 @@ class StrokeProtocol:
         self.current_id = None
 
     def new_stroke(self, stroke_id):
-        self.strokes[stroke_id] = []
-        self.current_id = stroke_id
+        cnt = 0
+        unique_id = stroke_id
+        while unique_id in self.strokes:
+            cnt += 1
+            unique_id = stroke_id + ("(%03d)" % cnt)
+        self.strokes[unique_id] = []
+        self.current_id = unique_id
 
     def addtoprotocol(self, *values):
         self.strokes[self.current_id] += values
