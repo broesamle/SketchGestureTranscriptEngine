@@ -530,7 +530,8 @@ class Visualizer(object):
                              transcriptIDprefix="",
                              spatialIDprefix="",
                              drawTrajLabels=False,
-                             trajLabelPrefixes=[]):
+                             trajLabelPrefixes=[],
+                             strokeprotocol=None):
         ### the transcriptIDprefix defines the prefix of the stroke IDs coming from the transcript.
         ### it has to be removed for mapping onto the svgdoc ids, which do not have the transcript sequence prefix
         ### TODO: a systematic path/namespace logic would neatly solve the issue without this 'hack'
@@ -629,6 +630,8 @@ class Visualizer(object):
                                          % (spatElID,transcriptIDprefix))
                 if self.lastPrintedStrokeID == spatElID:
                     continue
+                if strokeprotocol is not None:
+                    strokeprotocol.new_stroke(spatElID)
                 spatElID = spatialIDprefix + spatElID
                 ### rotate color palette / count total required colours
                 self.strokecolors.rotate()
@@ -659,10 +662,16 @@ class Visualizer(object):
                             break
                     if not svgpathdata:
                         print ("!!  missing trajectory data for spatial element %s" % spatElID)
-                    drawedtrajectories = self.drawStroke(svgpathdata, intervaldata, strokedeco)
+                    drawedtrajectories = self.drawStroke(
+                                                svgpathdata,
+                                                intervaldata,
+                                                strokedeco,
+                                                strokeprotocol)
                     for traj in drawedtrajectories:
                         polygoneA.append(traj['markers'][0])
                 except ValueError as verr:
+                    if strokeprotocol is not None:
+                        strokeprotocol.addtoprotocol("ERR!"+spatElID)
                     ### Put error info into the graphical output
                     errX,errY = self.errorPos()
                     polygoneA.append((errX,errY)) # add to connector polygone
@@ -723,7 +732,7 @@ class Visualizer(object):
     ### low level drawing for strokes etc ... these also take svg coordinates
     ### they return pyx coordinates as reference points such that drawn elements can be located on the
     ### canvas for further drawing (like labels for drawn paths etc)
-    def drawStroke(self,traj,intervaldata,decoration):
+    def drawStroke(self, traj, intervaldata, decoration, strokeprotocol):
         ### traj contains the SVG based trajectory information
         ### fingers is a string identifying the finger, hand, or tool (pen etc) for each trajectory
         fingers = intervaldata['fingers']
@@ -747,6 +756,8 @@ class Visualizer(object):
             ### composed multi finger trajectory
             if len(traj) == len(fingers):
                 ### trivial case: one finger code per trajectory =~ no hand movement, only static hands
+                if strokeprotocol is not None:
+                    strokeprotocol.addtoprotocol("composed_fingers", fingers)
                 for subtraj,f in zip(traj,fingers):
                     #self.drawTrajectoryElement(subtraj,f,decoration)
                     result.append(self.drawMovementTrajectory(subtraj,f,holdstart,holdstop,hold,strokedeco))
@@ -755,6 +766,8 @@ class Visualizer(object):
                 ### the other might be a static hand or a finger
                 ### n+1 trajectories, n finger infos
                 ### the hand must be the one with the two trajectories
+                if strokeprotocol is not None:
+                    strokeprotocol.addtoprotocol("composed_onehand_fingers", fingers)
                 foundit = False
                 for f in fingers:
                     if f in self.HANDCODES:
@@ -778,6 +791,8 @@ class Visualizer(object):
             elif len(traj)-len(fingers) == 2:
                 ### there is two hands with movement
                 ### since both hands are hands there should be no single fingers
+                if strokeprotocol is not None:
+                    strokeprotocol.addtoprotocol("composed_hands_moving", fingers)
                 if len(fingers) != 2:
                     print ("!!  Mismatching two hands gesture/ movement trajectories: %s/%s" % (fingers,traj))
                     raise InputError("!!  Mismatching two hands gesture/ movement trajectories: %s" % fingers)
@@ -804,8 +819,15 @@ class Visualizer(object):
                 print ("!!  Mismatching fingers/trajectories: %s/%s" % (fingers,traj))
                 raise InputError("!!  Mismatching fingers/trajectories: %s" % fingers)
             if fingers in self.HANDCODES:
+                if strokeprotocol is not None:
+                    strokeprotocol.addtoprotocol("onehand_static", fingers[0])
                 return [self.drawHandShape(traj,fingers[0],holdstart,holdstop,hold,strokedeco)]
             else:
+                if strokeprotocol is not None:
+                    if fingers == "l":
+                        strokeprotocol.addtoprotocol("drawing")
+                    else:
+                        strokeprotocol.addtoprotocol("onefinger_moving", fingers)
                 return [self.drawMovementTrajectory(traj,fingers,holdstart,holdstop,hold,strokedeco)]
 
     def drawHandShape(self,traj,handtype,holdstart,holdstop,hold,decor):

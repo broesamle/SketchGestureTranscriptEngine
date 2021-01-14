@@ -8,6 +8,8 @@ import xml.dom.minidom as xml
 import pyx
 import logging
 import os.path
+import csv
+from collections import OrderedDict
 
 from .StrokesSVG import SVGDocument
 
@@ -16,6 +18,24 @@ import datetime
 def texIfyParam(t):
     t = t.replace(r'_',r'\_')
     return t
+
+class StrokeProtocol:
+    def __init__(self):
+        self.strokes = OrderedDict()
+        self.current_id = None
+
+    def new_stroke(self, stroke_id):
+        self.strokes[stroke_id] = []
+        self.current_id = stroke_id
+
+    def addtoprotocol(self, *values):
+        self.strokes[self.current_id] += values
+
+    def write_csv(self, filename, dialect='excel-tab'):
+        with open(filename, 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile, dialect=dialect)
+            for stroke_id, row in self.strokes.items():
+                csvwriter.writerow([stroke_id] + row)
 
 class LoadedTrajManager(object):
     def __init__(self):
@@ -164,7 +184,7 @@ class SeqProcessor(object):
         inIdx/outIdx are used to slice within that sequence. The function is used for reacting on precise begin/end parameters by the user
         selected pages are a subordinary parameter for skipping pages in the output generation.
         """
-
+        self.strokeprotocol = StrokeProtocol()
         ### when not told otherwise, do the whole sequence
         ### indicate that a print region has been explicitly specified
         if inIdx or outIdx:
@@ -242,8 +262,14 @@ class SeqProcessor(object):
                         self.vis.drawBackgroundImage()
                         pageInfo = "%d (%d..%d)" % (pagecounter, lastPrintPos, currstop)
                         self.vis.setMetaData(page=pageInfo)
-                        drawnCanvases = self.vis.drawIntervalsBetween(aseq,lastPrintPos,currstop,self.loadedTraj.getAllLoaded(),
-                                    transcriptIDprefix=transcrIdPrefix,spatialIDprefix=spatialIdPrefix)
+                        drawnCanvases = self.vis.drawIntervalsBetween(
+                                                aseq,
+                                                lastPrintPos,
+                                                currstop,
+                                                self.loadedTraj.getAllLoaded(),
+                                                transcriptIDprefix=transcrIdPrefix,
+                                                spatialIDprefix=spatialIdPrefix,
+                                                strokeprotocol=self.strokeprotocol)
                         self.vis.drawMarkers()
                         self.vis.drawInfoHeaders()
                         print ("    appending page %d" % pagecounter)
@@ -302,3 +328,4 @@ class SeqProcessor(object):
                                              fittosize=1,
                                              rotated=1))
         self._enddoc()
+        self.strokeprotocol.write_csv(os.path.join(self.PDFpath,PDFfname+".csv"))
