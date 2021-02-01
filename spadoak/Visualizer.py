@@ -632,6 +632,11 @@ class Visualizer(object):
                     continue
                 if strokeprotocol is not None:
                     strokeprotocol.new_stroke(spatElID)
+                ### when sequential data is hidden, IDs need to be printed here.
+                if self.hideSeq and not self.hideIDs:
+                    self.canvas.text(150, 150,
+                                     "exported: "+cleanTexInput(spatElID),
+                                     [pyx.trafo.rotate(45)])
                 spatElID = spatialIDprefix + spatElID
                 ### rotate color palette / count total required colours
                 self.strokecolors.rotate()

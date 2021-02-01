@@ -8,6 +8,7 @@ Revised 26.11.18 - fixed bug, would not see files with capitalized extensions.
 """
 
 import csv
+import sys
 import rhinoscriptsyntax as rs
 import scriptcontext as sc
 import Rhino, os
@@ -52,9 +53,8 @@ def AddNumberSuffix(name, copy_count):
 def ProcessFolder(folder, ext, alt_ext, copy_count):
     wfnames = WorkingFileNames(folder, ext, alt_ext)
     if not wfnames.protocol:
-        msg = "No protocol file" % filename
-        rs.MessageBox(msg, 0, "Error")
-        return
+        msg = "No protocol file."
+        raise ValueError(msg)
     else:
         csvfile = open(os.path.join(folder, wfnames.protocol), 'rb')
         csvreader = csv.reader(csvfile, dialect = 'excel-tab')
@@ -64,12 +64,12 @@ def ProcessFolder(folder, ext, alt_ext, copy_count):
     if len(protocol) != len(wfnames.filenames):
         msg = ("Number of protocol entries %d does not match number of PDF files %d."
                % (len(protocol), len(wfnames.filenames)))
-        rs.MessageBox(msg, 0, "Error")
-        return
+        raise ValueError(msg)
     if not wfnames.filenames: return
     obj_count = 0
     file_count = 0
     raise_copy_count = False
+    rs.AddLayer("id-labels")
     for filename, protorow in zip(wfnames.filenames, protocol):
         while len(protorow) < 4:
             protorow.append("")
@@ -95,6 +95,8 @@ def ProcessFolder(folder, ext, alt_ext, copy_count):
         if not rs.IsLayer(target_layer):
             p_layer = rs.AddLayer(target_layer)
         rs.ObjectLayer(lco, target_layer)
+        txtobj = rs.AddText("imported: " + stroke_id, (0, 20, 2*file_count))
+        rs.ObjectLayer(txtobj, "id-labels")
     return True, file_count, obj_count, raise_copy_count
 
 def BatchImportWithSublayers():
@@ -154,6 +156,7 @@ def BatchImportWithSublayers():
         rs.SetDocumentData("BI_CopyCount", "Current_Count", copy_count)
     #store last used file type, folder
     sc.sticky["BI_PrevFolder"] = folder
-    sc.sticky["BI_PrevFileType"] = fType
+    if SELECT_FILETYPE:
+        sc.sticky["BI_PrevFileType"] = fType
 
 BatchImportWithSublayers()
